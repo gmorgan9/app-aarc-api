@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, redirect
 import psycopg2
 import psycopg2.extras
 from dotenv import load_dotenv
@@ -83,11 +83,11 @@ def login():
     else:
         return jsonify({'message': 'Invalid username or password', 'status': 'error'})
     
-@app.route('/logout')
+@app.route('/api/logout')
 @login_required
 def logout():
     logout_user()
-    return {'message': 'Logout successful'}
+    return redirect('https://app-aarc.morganserver.com/')
 
 @app.route('/protected')
 @login_required
