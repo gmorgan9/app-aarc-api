@@ -37,11 +37,12 @@ def login():
     work_email = request.json.get('work_email')
     password = request.json.get('password')
 
-    users = Users.query.filter_by(work_email=work_email).first()
-    if users and check_password_hash(users.password, password):
-        login_user(users)
+    user = Users.query.filter_by(work_email=work_email).first()
+    if user and check_password_hash(user.password, password):
+        # Password matches; you can proceed with login
         return jsonify({'message': 'Login successful'})
     else:
+        # Password doesn't match or user doesn't exist
         return jsonify({'message': 'Login failed'}), 401
 
 # Logout route
