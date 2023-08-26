@@ -19,7 +19,7 @@ db = SQLAlchemy(app)
 
 
 class User(db.Model, UserMixin):
-    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, primary_key=True)
     work_email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(120), nullable=False)  # You should hash and salt passwords
     # Add more fields as needed
