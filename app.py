@@ -46,41 +46,21 @@ def dashboard():
     # Your dashboard logic here
     return redirect('https://app-aarc.morganserver.com/dashboard')
 
-# # Your '/api/login' route
-# @app.route('/api/login', methods=['POST'])
-# def login():
-#     if request.headers.get('Content-Type') == 'application/json':
-#         data = request.get_json()
-#         work_email = data.get('work_email')
-#         password = data.get('password')
 
-#         user = Users.query.filter_by(work_email=work_email).first()
-#         if user and check_password_hash(user.password, password):
-#             # Password matches; you can proceed with login
-#             login_user(user)  # Log the user in
-#             return redirect(url_for('dashboard'))  # Redirect to the dashboard
-#         else:
-#             # Password doesn't match or user doesn't exist
-#             return jsonify({'message': 'Login failed'}), 401
-#     else:
-#         return jsonify({'message': 'Unsupported Media Type: Use Content-Type: application/json'}), 415
-
+# login
 @app.route('/api/login', methods=['POST'])
 def login():
-    try:
-        data = request.get_json()
-        work_email = data.get('work_email')
-        password = data.get('password')
-        
-        # Debugging: Print received JSON data
-        print("Received JSON data:", data)
-    except Exception as e:
-        return jsonify({'message': 'Invalid JSON data'}), 400
+    work_email = request.form.get('work_email')
+    password = request.form.get('password')
 
-    # Rest of your login code here
-
-
-    # Rest of your login code here
+    user = Users.query.filter_by(work_email=work_email).first()
+    if user and check_password_hash(user.password, password):
+        # Password matches; you can proceed with login
+        login_user(user)  # Log the user in
+        return redirect(url_for('dashboard'))  # Redirect to the dashboard
+    else:
+        # Password doesn't match or user doesn't exist
+        return jsonify({'message': 'Login failed'}), 401
 
 
 # Your '/api/logout' route
