@@ -1,0 +1,24 @@
+# @app.route('/api/login', methods=['POST'])
+# def login():
+#     # Get user input from the request
+#     data = request.get_json()
+#     work_email = data.get('work_email')
+#     password = data.get('password')
+
+#     # Check user credentials in the database
+#     try:
+#         conn = connect_to_database()
+#         cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+#         cursor.execute("SELECT * FROM users WHERE work_email = %s AND password = %s", (work_email, password))
+#         user = cursor.fetchone()
+
+#         if user:
+#             return jsonify({'message': 'Login successful', 'status': 'success'})
+#         else:
+#             return jsonify({'message': 'Invalid username or password', 'status': 'error'})
+#     except Exception as e:
+#         return jsonify({'message': 'An error occurred', 'status': 'error'})
+#     finally:
+#         cursor.close()
+#         conn.close()

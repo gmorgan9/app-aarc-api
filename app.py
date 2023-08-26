@@ -13,7 +13,7 @@ app = Flask(__name__)
 CORS(app)
 app.secret_key = secrets.token_hex(16)
 login_manager = LoginManager(app)
-login_manager.login_view = 'login'
+login_manager.login_view = 'https://app-aarc.morganserver.com/'
 
 # Database connection parameters
 db_params = {
@@ -46,30 +46,7 @@ def get_data():
     }
     return jsonify(data)
 
-# @app.route('/api/login', methods=['POST'])
-# def login():
-#     # Get user input from the request
-#     data = request.get_json()
-#     work_email = data.get('work_email')
-#     password = data.get('password')
 
-#     # Check user credentials in the database
-#     try:
-#         conn = connect_to_database()
-#         cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
-#         cursor.execute("SELECT * FROM users WHERE work_email = %s AND password = %s", (work_email, password))
-#         user = cursor.fetchone()
-
-#         if user:
-#             return jsonify({'message': 'Login successful', 'status': 'success'})
-#         else:
-#             return jsonify({'message': 'Invalid username or password', 'status': 'error'})
-#     except Exception as e:
-#         return jsonify({'message': 'An error occurred', 'status': 'error'})
-#     finally:
-#         cursor.close()
-#         conn.close()
 
 @app.route('/api/login', methods=['POST'])
 def login():
@@ -91,6 +68,14 @@ def login():
                 return jsonify({'message': 'Invalid username or password', 'status': 'error'})
     except Exception as e:
         return jsonify({'message': 'An error occurred', 'status': 'error'})
+
+
+
+
+@app.route('/api/check_login', methods=['GET'])
+@login_required
+def check_login():
+    return jsonify({'message': 'You are logged in', 'status': 'success'})
 
     
 @app.route('/api/logout')
