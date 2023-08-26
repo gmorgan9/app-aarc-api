@@ -34,16 +34,21 @@ login_manager.init_app(app)
 # Login route
 @app.route('/api/login', methods=['POST'])
 def login():
-    work_email = request.json.get('work_email')
-    password = request.json.get('password')
+    if request.headers['Content-Type'] == 'application/json':
+        data = request.get_json()
+        work_email = data.get('work_email')
+        password = data.get('password')
 
-    user = Users.query.filter_by(work_email=work_email).first()
-    if user and check_password_hash(user.password, password):
-        # Password matches; you can proceed with login
-        return jsonify({'message': 'Login successful'})
+        user = Users.query.filter_by(work_email=work_email).first()
+        if user and check_password_hash(user.password, password):
+            # Password matches; you can proceed with login
+            return jsonify({'message': 'Login successful'})
+        else:
+            # Password doesn't match or user doesn't exist
+            return jsonify({'message': 'Login failed'}), 401
     else:
-        # Password doesn't match or user doesn't exist
-        return jsonify({'message': 'Login failed'}), 401
+        return jsonify({'message': 'Unsupported Media Type'}), 415
+
 
 # Logout route
 @app.route('/api/logout')
