@@ -67,17 +67,17 @@ def get_data():
 @app.route('/api/login', methods=['POST'])
 def login():
     data = request.get_json()
-    user_id = data.get('user_id')
+    work_email = data.get('work_email')
     password = data.get('password')
 
     conn = connect_to_database()
     cursor = conn.cursor()
-    cursor.execute("SELECT password FROM users WHERE user_id = %s", (user_id,))
+    cursor.execute("SELECT password FROM users WHERE work_email = %s", (work_email,))
     db_password = cursor.fetchone()
     cursor.close()
 
     if db_password and db_password[0] == password:
-        user = User(user_id)
+        user = User(work_email)
         login_user(user)
         return {'message': 'Login successful'}
     else:
