@@ -34,7 +34,7 @@ login_manager.init_app(app)
 # Login route
 @app.route('/api/login', methods=['POST'])
 def login():
-    if request.headers['Content-Type'] == 'application/json':
+    if request.headers.get('Content-Type') == 'application/json':
         data = request.get_json()
         work_email = data.get('work_email')
         password = data.get('password')
@@ -47,7 +47,8 @@ def login():
             # Password doesn't match or user doesn't exist
             return jsonify({'message': 'Login failed'}), 401
     else:
-        return jsonify({'message': 'Unsupported Media Type'}), 415
+        return jsonify({'message': 'Unsupported Media Type: Use Content-Type: application/json'}), 415
+
 
 
 # Logout route
