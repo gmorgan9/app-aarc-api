@@ -79,9 +79,9 @@ def login():
     if db_password and db_password[0] == password:
         user = User(work_email)
         login_user(user)
-        return {'message': 'Login successful'}
+        return jsonify({'message': 'Login successful', 'status': 'success'})
     else:
-        return {'message': 'Login failed'}, 401
+        return jsonify({'message': 'Invalid username or password', 'status': 'error'})
     
 @app.route('/logout')
 @login_required
