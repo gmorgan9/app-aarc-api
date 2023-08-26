@@ -1,11 +1,11 @@
+from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, UserMixin, login_user
 from flask import Flask, jsonify, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 import os
 from flask_cors import CORS
 import secrets
-from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required
-from flask_bcrypt import Bcrypt, check_password_hash  # Import Bcrypt
+from flask_bcrypt import Bcrypt, check_password_hash
 
 load_dotenv()  # Load environment variables from .env
 
@@ -14,7 +14,7 @@ CORS(app)
 app.secret_key = secrets.token_hex(16)
 
 # Configure SQLAlchemy
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("SQLALCHEMY_DATABASE_URI")  # Use your actual database URL
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("SQLALCHEMY_DATABASE_URI")
 db = SQLAlchemy(app)
 
 # Initialize Bcrypt
@@ -25,7 +25,7 @@ class Users(db.Model, UserMixin):
     user_id = db.Column(db.Integer, primary_key=True)
     work_email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(120), nullable=False)
-    
+
     def get_id(self):
         return str(self.user_id)
 
@@ -34,15 +34,19 @@ login_manager = LoginManager()
 login_manager.login_view = 'https://app-aarc.morganserver.com/'  # Replace with your login route
 login_manager.init_app(app)
 
+# Define the user_loader function
+@login_manager.user_loader
+def load_user(user_id):
+    return Users.query.get(int(user_id))
 
+# Your '/dashboard' route
 @app.route('/dashboard')
 @login_required
 def dashboard():
     # Your dashboard logic here
     return redirect('https://app-aarc.morganserver.com/dashboard')
 
-
-# Login route
+# Your '/api/login' route
 @app.route('/api/login', methods=['POST'])
 def login():
     if request.headers.get('Content-Type') == 'application/json':
@@ -61,9 +65,7 @@ def login():
     else:
         return jsonify({'message': 'Unsupported Media Type: Use Content-Type: application/json'}), 415
 
-
-
-# Logout route
+# Your '/api/logout' route
 @app.route('/api/logout')
 @login_required
 def logout():
