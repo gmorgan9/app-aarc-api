@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 import os
@@ -31,6 +31,14 @@ login_manager = LoginManager()
 login_manager.login_view = 'https://app-aarc.morganserver.com/'  # Replace with your login route
 login_manager.init_app(app)
 
+
+@app.route('/dashboard')
+@login_required
+def dashboard():
+    # Your dashboard logic here
+    return redirect('https://app-aarc.morganserver.com/dashboard')
+
+
 # Login route
 @app.route('/api/login', methods=['POST'])
 def login():
@@ -42,7 +50,8 @@ def login():
         user = Users.query.filter_by(work_email=work_email).first()
         if user and check_password_hash(user.password, password):
             # Password matches; you can proceed with login
-            return jsonify({'message': 'Login successful'})
+            login_user(user)  # Log the user in
+            return redirect(url_for('dashboard'))  # Redirect to the dashboard
         else:
             # Password doesn't match or user doesn't exist
             return jsonify({'message': 'Login failed'}), 401
