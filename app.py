@@ -6,10 +6,12 @@ import psycopg2
 import psycopg2.extras
 from dotenv import load_dotenv
 import os
+from flask_cors import CORS
 
 load_dotenv()  # Load environment variables from .env
 
 app = Flask(__name__)
+CORS(app)
 
 # Database connection parameters
 db_params = {
@@ -43,7 +45,7 @@ def login():
         conn = connect_to_database()
         cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-        cursor.execute("SELECT * FROM user WHERE work_email = %s AND password = %s", (work_email, password))
+        cursor.execute("SELECT * FROM users WHERE work_email = %s AND password = %s", (work_email, password))
         user = cursor.fetchone()
 
         if user:
