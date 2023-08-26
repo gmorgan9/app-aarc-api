@@ -71,8 +71,14 @@ def login():
         data = request.get_json()
         work_email = data.get('work_email')
         password = data.get('password')
+        
+        # Debugging: Print received JSON data
+        print("Received JSON data:", data)
     except Exception as e:
         return jsonify({'message': 'Invalid JSON data'}), 400
+
+    # Rest of your login code here
+
 
     # Rest of your login code here
 
