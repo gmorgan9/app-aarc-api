@@ -15,7 +15,7 @@ app.secret_key = secrets.token_hex(16)
 db = SQLAlchemy(app)
 
 # Configure SQLAlchemy
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")  # Use your actual database URL
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("SQLALCHEMY_DATABASE_URI")  # Use your actual database URL
 db = SQLAlchemy(app)
 
 login_manager = LoginManager(app)
