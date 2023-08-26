@@ -21,7 +21,7 @@ db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 
 # Define the User model
-class User(db.Model, UserMixin):
+class Users(db.Model, UserMixin):
     user_id = db.Column(db.Integer, primary_key=True)
     work_email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(120), nullable=False)
@@ -37,9 +37,9 @@ def login():
     work_email = request.json.get('work_email')
     password = request.json.get('password')
 
-    user = User.query.filter_by(work_email=work_email).first()
-    if user and check_password_hash(user.password, password):
-        login_user(user)
+    users = Users.query.filter_by(work_email=work_email).first()
+    if users and check_password_hash(users.password, password):
+        login_user(users)
         return jsonify({'message': 'Login successful'})
     else:
         return jsonify({'message': 'Login failed'}), 401
