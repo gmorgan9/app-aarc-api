@@ -31,6 +31,13 @@ class User(UserMixin):
     def __init__(self, user_id):
         self.id = user_id
 
+@login_manager.user_loader
+def load_user(user_id):
+    # Load a user from your database by their user_id
+    # Replace this with your database logic
+    user = User.query.get(int(user_id))
+    return user
+
 @app.route('/api/data', methods=['GET'])
 def get_data():
     data = {
