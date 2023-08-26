@@ -77,18 +77,21 @@ def login():
     work_email = data.get('work_email')
     password = data.get('password')
 
-    conn = connect_to_database()
-    cursor = conn.cursor()
-    cursor.execute("SELECT password FROM users WHERE work_email = %s", (work_email,))
-    db_password = cursor.fetchone()
-    cursor.close()
+    try:
+        with connect_to_database() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT password FROM users WHERE work_email = %s", (work_email,))
+            db_password = cursor.fetchone()
+            
+            if db_password and db_password[0] == password:
+                user = User(work_email)
+                login_user(user)
+                return jsonify({'message': 'Login successful', 'status': 'success'})
+            else:
+                return jsonify({'message': 'Invalid username or password', 'status': 'error'})
+    except Exception as e:
+        return jsonify({'message': 'An error occurred', 'status': 'error'})
 
-    if db_password and db_password[0] == password:
-        user = User(work_email)
-        login_user(user)
-        return jsonify({'message': 'Login successful', 'status': 'success'})
-    else:
-        return jsonify({'message': 'Invalid username or password', 'status': 'error'})
     
 @app.route('/api/logout')
 @login_required
