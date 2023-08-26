@@ -51,10 +51,10 @@ def get_data():
 @app.route('/api/login', methods=['POST'])
 def login():
     data = request.get_json()
-    username = data.get('username')
+    work_email = data.get('work_email')
     password = data.get('password')
 
-    user = User.query.filter_by(username=username).first()
+    user = User.query.filter_by(work_email=work_email).first()
 
     if user and user.password == password:
         login_user(user)
