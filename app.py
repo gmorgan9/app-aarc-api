@@ -13,7 +13,7 @@ app = Flask(__name__)
 CORS(app)
 app.secret_key = secrets.token_hex(16)
 login_manager = LoginManager(app)
-login_manager.login_view = 'https://app-aarc.morganserver.com/'
+login_manager.login_view = 'api/login'
 
 # Database connection parameters
 db_params = {
