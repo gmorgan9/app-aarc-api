@@ -23,9 +23,13 @@ db_params = {
 def connect_to_database():
     return psycopg2.connect(**db_params)
 
-@app.route('/')
-def hello_world():
-    return 'Hello, World!'
+@app.route('/api/data', methods=['GET'])
+def get_data():
+    data = {
+        'message': 'This is JSON data from your Flask API!',
+        'status': 'success'
+    }
+    return jsonify(data)
 
 @app.route('/api/login', methods=['POST'])
 def login():
