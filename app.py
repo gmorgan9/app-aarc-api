@@ -25,6 +25,9 @@ class Users(db.Model, UserMixin):
     user_id = db.Column(db.Integer, primary_key=True)
     work_email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(120), nullable=False)
+    
+    def get_id(self):
+        return str(self.user_id)
 
 # Initialize Flask-Login
 login_manager = LoginManager()
