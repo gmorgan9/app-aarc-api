@@ -64,7 +64,7 @@ def get_data():
 #         cursor.close()
 #         conn.close()
 
-@app.route('/login', methods=['POST'])
+@app.route('/api/login', methods=['POST'])
 def login():
     data = request.get_json()
     user_id = data.get('user_id')
