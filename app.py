@@ -33,7 +33,7 @@ login_manager.init_app(app)
 
 @app.route('/api/login', methods=['POST'])
 def login():
-    username = request.json.get('username')
+    work_email = request.json.get('work_email')
     password = request.json.get('password')
 
     user = User.query.filter_by(username=username).first()
