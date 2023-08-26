@@ -12,7 +12,6 @@ load_dotenv()  # Load environment variables from .env
 app = Flask(__name__)
 CORS(app)
 app.secret_key = secrets.token_hex(16)
-db = SQLAlchemy(app)
 
 # Configure SQLAlchemy
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("SQLALCHEMY_DATABASE_URI")  # Use your actual database URL
