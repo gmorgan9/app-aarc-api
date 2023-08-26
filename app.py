@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, redirect
+from flask import Flask, jsonify, request, redirect, url_for, flash
 import psycopg2
 import psycopg2.extras
 from dotenv import load_dotenv
@@ -6,6 +6,7 @@ import os
 from flask_cors import CORS
 import secrets
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required
+from functools import wraps
 
 load_dotenv()  # Load environment variables from .env
 
@@ -13,7 +14,7 @@ app = Flask(__name__)
 CORS(app)
 app.secret_key = secrets.token_hex(16)
 login_manager = LoginManager(app)
-login_manager.login_view = '/api/login'
+login_manager.login_view = 'https://app-aarc.morganserver.com/'
 
 # Database connection parameters
 db_params = {
@@ -37,6 +38,19 @@ def load_user(user_id):
     # Replace this with your database logic
     user = User.query.get(int(user_id))
     return user
+
+protected_urls = ['https://app-aarc.morganserver.com/dashboard/']
+
+
+def login_required_for_protected(func):
+    @wraps(func)
+    def decorated_view(*args, **kwargs):
+        if not current_user.is_authenticated:
+            flash('You need to be logged in to access this page.', 'error')
+            return redirect(url_for('login', next=request.url))
+        return func(*args, **kwargs)
+    return decorated_view
+
 
 @app.route('/api/data', methods=['GET'])
 def get_data():
@@ -63,7 +77,9 @@ def login():
             if db_password and db_password[0] == password:
                 user = User(work_email)
                 login_user(user)
-                return jsonify({'message': 'Login successful', 'status': 'success'})
+
+                # Redirect to the dashboard upon successful login
+                return redirect('https://app-aarc.morganserver.com/dashboard/')
             else:
                 return jsonify({'message': 'Invalid username or password', 'status': 'error'})
     except Exception as e:
