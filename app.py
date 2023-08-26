@@ -1,10 +1,10 @@
-from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, UserMixin, login_user
 from flask import Flask, jsonify, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 import os
 from flask_cors import CORS
 import secrets
+from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required
 from flask_bcrypt import Bcrypt, check_password_hash
 
 load_dotenv()  # Load environment variables from .env
@@ -37,7 +37,7 @@ login_manager.init_app(app)
 # Define the user_loader function
 @login_manager.user_loader
 def load_user(user_id):
-    return Users.query.get(int(user_id))
+    return db.session.query(Users).get(int(user_id))
 
 # Your '/dashboard' route
 @app.route('/dashboard')
