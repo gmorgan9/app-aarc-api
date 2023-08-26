@@ -18,7 +18,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("SQLALCHEMY_DATABASE_URI")  # 
 db = SQLAlchemy(app)
 
 
-class User(db.Model, UserMixin):
+class Users(db.Model, UserMixin):
     user_id = db.Column(db.Integer, primary_key=True)
     work_email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(120), nullable=False)  # You should hash and salt passwords
@@ -36,7 +36,7 @@ def login():
     work_email = request.json.get('work_email')
     password = request.json.get('password')
 
-    users = User.query.filter_by(work_email=work_email).first()
+    users = Users.query.filter_by(work_email=work_email).first()
     if users and check_password_hash(users.password, password):
         login_user(users)
         return jsonify({'message': 'Login successful'})
