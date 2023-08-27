@@ -23,6 +23,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("SQLALCHEMY_DATABASE_URI")
 
 # Define your User model
 class User(db.Model):
+    __tablename__ = 'users'
     user_id = db.Column(db.Integer, primary_key=True)
     work_email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(120), nullable=False)
