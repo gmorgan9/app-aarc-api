@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, session
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 import os
@@ -20,6 +20,8 @@ class User(db.Model):
     password = db.Column(db.String(100), nullable=False)
     logged_in = db.Column(db.Integer, default=0)  # Set logged_in as an integer
 
+
+
 @app.route('/api/login', methods=['POST'])
 def login():
     work_email = request.form.get('work_email')
@@ -33,10 +35,14 @@ def login():
         user.logged_in = 1  # Set the logged_in status to 1
         db.session.commit()  # Commit the changes to the database
 
+        # Set session items
+        session['user_id'] = user.user_id  # You can store any user-related data in the session
+
         return jsonify({"message": "Login successful"}), 200
     else:
         # Authentication failed
         return jsonify({"message": "Login failed"}), 401
+
 
 @app.route('/api/logout', methods=['POST'])
 def logout():
