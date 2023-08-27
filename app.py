@@ -30,7 +30,7 @@ def login():
 
     if user and bcrypt.check_password_hash(user.password, password):
         # Authentication successful
-        user.logged_in = 1  # Set the logged_in status to True
+        user.logged_in = True  # Set the logged_in status to True
         db.session.commit()  # Commit the changes to the database
 
         return jsonify({"message": "Login successful"}), 200
