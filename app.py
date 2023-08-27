@@ -81,18 +81,27 @@ def login():
         return resp
 
     
-@app.route('/logout')
+@app.route('/logout', methods=['GET'])
 def logout():
-    if 'work_email' in session:
-        
+    # Get the user_id from the query parameters
+    user_id = request.args.get('user_id')
+
+    if user_id:
+        # You may want to include additional validation here to ensure the user exists
+        # and is logged in before performing the logout action
+
+        # Assuming you have a 'logged_in' column in your 'users' table
         update_cursor = conn.cursor()
-        user_id = session.get('user_id')
-        update_sql = "UPDATE users SET logged_in = 1 WHERE user_id = %s"
+        update_sql = "UPDATE users SET logged_in = 0 WHERE id = %s"
         update_cursor.execute(update_sql, (user_id,))
         conn.commit()
         update_cursor.close()
-        session.pop('work_email', None)
-    return jsonify({'message' : 'You successfully logged out'})
+
+        return jsonify({'message': 'User successfully logged out'})
+
+    # If the user_id is not provided or if there are errors, you can handle it accordingly
+    return jsonify({'message': 'Logout failed. Please provide a valid user_id.'}), 400
+
 
 
 if __name__ == '__main__':
