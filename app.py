@@ -59,7 +59,7 @@ def login():
     if user and bcrypt.check_password_hash(user.password, password):
         token = jwt.encode({'user_id': user.user_id, 'exp': datetime.utcnow() + timedelta(hours=1)},
                            app.secret_key, algorithm='HS256')
-        return jsonify({'token': token.decode('utf-8')}), 200
+        return jsonify({'token': token}), 200  # Removed .decode('utf-8')
     else:
         return jsonify({'message': 'Login failed'}), 401
 
