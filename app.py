@@ -81,10 +81,38 @@ def login():
         return resp
     
 
-@app.route('/api/session_data', methods=['GET'])
-def get_session_data():
-    user_email = session.get('user_email')
-    return jsonify({'user_email': user_email})
+@app.route('/api/authenticated_user', methods=['GET'])
+def get_authenticated_user():
+    if 'work_email' in session:
+        work_email = session['work_email']
+        user_id = session['user_id']
+        
+        # You can retrieve additional user data from the database based on user_id
+        # For example, assuming you have a 'users' table
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        sql = "SELECT * FROM users WHERE user_id = %s"
+        cursor.execute(sql, (user_id,))
+        user_data = cursor.fetchone()
+        cursor.close()
+        
+        if user_data:
+            # Construct the response JSON with user data
+            response_data = {
+                'work_email': work_email,
+                'user_id': user_id,
+                'other_data': user_data  # Include other user data from the database
+            }
+            
+            return jsonify(response_data)
+        else:
+            resp = jsonify({'message': 'User data not found'})
+            resp.status_code = 404
+            return resp
+    else:
+        resp = jsonify({'message': 'Unauthorized'})
+        resp.status_code = 401
+        return resp
+
 
     
 @app.route('/logout', methods=['GET'])
