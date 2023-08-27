@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 import os
 from flask_cors import CORS
 import secrets
-from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required
+from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from flask_bcrypt import Bcrypt, check_password_hash
 
 load_dotenv()  # Load environment variables from .env
