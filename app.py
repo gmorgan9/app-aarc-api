@@ -8,7 +8,7 @@ from flask_bcrypt import Bcrypt
 load_dotenv()  # Load environment variables from .env
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("SQLALCHEMY_DATABASE_URI")  # Load SQLAlchemy URI from .env
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
