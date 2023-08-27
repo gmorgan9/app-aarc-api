@@ -18,6 +18,7 @@ class User(db.Model):
     user_id = db.Column(db.Integer, primary_key=True)
     work_email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
+    logged_in = db.Column(db.Boolean, default=False)  # Add a logged_in field
 
 @app.route('/api/login', methods=['POST'])
 def login():
@@ -29,6 +30,9 @@ def login():
 
     if user and bcrypt.check_password_hash(user.password, password):
         # Authentication successful
+        user.logged_in = 1  # Set the logged_in status to True
+        db.session.commit()  # Commit the changes to the database
+
         return jsonify({"message": "Login successful"}), 200
     else:
         # Authentication failed
