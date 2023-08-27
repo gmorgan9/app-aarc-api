@@ -87,20 +87,26 @@ def logout():
     user_id = request.args.get('user_id')
 
     if user_id:
-        # You may want to include additional validation here to ensure the user exists
-        # and is logged in before performing the logout action
-
         # Assuming you have a 'logged_in' column in your 'users' table
         update_cursor = conn.cursor()
-        update_sql = "UPDATE users SET logged_in = 0 WHERE id = %s"
+        update_sql = "UPDATE users SET logged_in = 0 WHERE id = %s RETURNING work_email"
         update_cursor.execute(update_sql, (user_id,))
-        conn.commit()
-        update_cursor.close()
-
-        return jsonify({'message': 'User successfully logged out'})
+        updated_user = update_cursor.fetchone()
+        
+        if updated_user:
+            # Clear the session data for the logged-out user
+            session.pop('work_email', None)
+            
+            conn.commit()
+            update_cursor.close()
+            return jsonify({'message': f'User {updated_user["work_email"]} successfully logged out'})
+        else:
+            update_cursor.close()
+            return jsonify({'message': 'Logout failed. User not found or not logged in.'}), 400
 
     # If the user_id is not provided or if there are errors, you can handle it accordingly
     return jsonify({'message': 'Logout failed. Please provide a valid user_id.'}), 400
+
 
 
 
