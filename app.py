@@ -2,6 +2,7 @@ from flask import Flask, jsonify, request, session
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 import os
+import secrets
 from flask_cors import CORS
 from flask_bcrypt import Bcrypt
 
@@ -12,6 +13,7 @@ CORS(app, resources={r"/api/*": {"origins": "*"}})
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("SQLALCHEMY_DATABASE_URI")  # Load SQLAlchemy URI from .env
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
+app.secret_key = secrets.token_hex(16)
 
 class User(db.Model):
     __tablename__ = 'users'
