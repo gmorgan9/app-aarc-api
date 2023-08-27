@@ -94,18 +94,22 @@ def logout():
         updated_user = update_cursor.fetchone()
         
         if updated_user:
+            # Extract the 'work_email' from the tuple
+            work_email = updated_user[0]
+
             # Clear the session data for the logged-out user
             session.pop('work_email', None)
             
             conn.commit()
             update_cursor.close()
-            return jsonify({'message': f'User {updated_user["work_email"]} successfully logged out'})
+            return jsonify({'message': f'User {work_email} successfully logged out'})
         else:
             update_cursor.close()
             return jsonify({'message': 'Logout failed. User not found or not logged in.'}), 400
 
     # If the user_id is not provided or if there are errors, you can handle it accordingly
     return jsonify({'message': 'Logout failed. Please provide a valid user_id.'}), 400
+
 
 
 
