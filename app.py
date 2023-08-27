@@ -44,6 +44,26 @@ def login():
     else:
         # Authentication failed
         return jsonify({"message": "Login failed"}), 401
+    
+
+@app.route('/api/userdata', methods=['GET'])
+def userdata():
+    # Check if the user is logged in (you can add more checks if needed)
+    if 'user_id' in session:
+        user_id = session['user_id']
+        user = User.query.get(user_id)
+        
+        if user:
+            # Return user data as JSON
+            return jsonify({
+                "user_id": user.user_id,
+                "work_email": user.work_email,
+                "logged_in": user.logged_in
+            }), 200
+        else:
+            return jsonify({"message": "User not found"}), 404
+    else:
+        return jsonify({"message": "User not logged in"}), 401
 
 
 @app.route('/api/logout', methods=['POST'])
