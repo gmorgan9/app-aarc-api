@@ -21,9 +21,8 @@ class User(db.Model):
 
 @app.route('/api/login', methods=['POST'])
 def login():
-    data = request.get_json()
-    work_email = data.get('work_email')
-    password = data.get('password')
+    work_email = request.form.get('work_email')
+    password = request.form.get('password')
 
     # Check if the user exists
     user = User.query.filter_by(work_email=work_email).first()
