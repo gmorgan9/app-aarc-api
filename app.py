@@ -89,7 +89,7 @@ def logout():
     if user_id:
         # Assuming you have a 'logged_in' column in your 'users' table
         update_cursor = conn.cursor()
-        update_sql = "UPDATE users SET logged_in = 0 WHERE id = %s RETURNING work_email"
+        update_sql = "UPDATE users SET logged_in = 0 WHERE user_id = %s RETURNING work_email"
         update_cursor.execute(update_sql, (user_id,))
         updated_user = update_cursor.fetchone()
         
