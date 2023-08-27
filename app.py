@@ -79,6 +79,12 @@ def login():
         resp = jsonify({'message': 'Bad Request - invalid credentials'})
         resp.status_code = 400
         return resp
+    
+
+@app.route('/api/session_data', methods=['GET'])
+def get_session_data():
+    user_email = session.get('user_email')
+    return jsonify({'user_email': user_email})
 
     
 @app.route('/logout', methods=['GET'])
