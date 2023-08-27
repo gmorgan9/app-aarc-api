@@ -14,6 +14,7 @@ load_dotenv()  # Load environment variables from .env
 app = Flask(__name__)
 CORS(app)
 app.secret_key = secrets.token_hex(16)  # Generate a new secret key each time the application runs (not recommended for production)
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("SQLALCHEMY_DATABASE_URI")  # Load SQLAlchemy URI from .env
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 
