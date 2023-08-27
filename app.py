@@ -6,6 +6,7 @@ from flask_cors import CORS
 from flask_bcrypt import Bcrypt
 from datetime import datetime, timedelta
 from flask_wtf.csrf import CSRFProtect
+import secrets
 
 load_dotenv()  # Load environment variables from .env
 
@@ -14,6 +15,13 @@ CORS(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("SQLALCHEMY_DATABASE_URI")  # Load SQLAlchemy URI from .env
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
+
+# Generate a secure secret key
+secret_key = secrets.token_hex(16)  # Change the length as needed
+
+# Set the Flask app's secret key
+app.secret_key = secret_key
+
 csrf = CSRFProtect(app)
 
 # Configure SQLAlchemy
