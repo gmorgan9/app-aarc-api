@@ -63,19 +63,16 @@ def login():
         return jsonify({'message': 'Login failed'}), 401
     
 
-# Your '/api/user' route to get user information
+# Add this route to your Flask app
 @app.route('/api/user')
 @login_required
 def get_user_info():
-    user = Users.query.get(int(current_user.get_id()))
-    if user:
-        user_info = {
-            'user_id': user.user_id,
-            'work_email': user.work_email
-        }
-        return jsonify(user_info)
-    else:
-        return jsonify({'message': 'User not found'}), 404
+    # Access the current user and return their information
+    user_info = {
+        "work_email": current_user.work_email,
+        # Add other user attributes here if needed
+    }
+    return jsonify(user_info)
 
 
 
