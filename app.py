@@ -61,6 +61,22 @@ def login():
     else:
         # Password doesn't match or user doesn't exist
         return jsonify({'message': 'Login failed'}), 401
+    
+
+# Your '/api/user' route to get user information
+@app.route('/api/user')
+@login_required
+def get_user_info():
+    user = Users.query.get(int(current_user.get_id()))
+    if user:
+        user_info = {
+            'user_id': user.user_id,
+            'work_email': user.work_email
+        }
+        return jsonify(user_info)
+    else:
+        return jsonify({'message': 'User not found'}), 404
+
 
 
 # Your '/api/logout' route
