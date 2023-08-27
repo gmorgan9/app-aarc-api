@@ -83,11 +83,7 @@ def login():
 
 @app.route('/api/authenticated_user', methods=['GET'])
 def get_authenticated_user():
-    app.logger.debug('Checking session...')
     if 'work_email' in session:
-        app.logger.debug('Session found.')
-        # ... (rest of the code)
-
         work_email = session['work_email']
         user_id = session['user_id']
         
@@ -116,6 +112,7 @@ def get_authenticated_user():
         resp = jsonify({'message': 'Unauthorized'})
         resp.status_code = 401
         return resp
+
 
 
     
