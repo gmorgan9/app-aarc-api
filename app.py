@@ -38,7 +38,7 @@ def home():
         resp.status_code = 401
         return resp
     
-@app.route('/login', methods=['POST'])
+@app.route('/api/login', methods=['POST'])
 def login():
     _json = request.json
     _work_email = _json['work_email']
