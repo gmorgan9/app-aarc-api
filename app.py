@@ -3,52 +3,35 @@ from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 import os
 from flask_cors import CORS
-from flask_bcrypt import Bcrypt
-from datetime import datetime, timedelta
-from flask_wtf.csrf import CSRFProtect
 
 load_dotenv()  # Load environment variables from .env
 
 app = Flask(__name__)
 CORS(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("SQLALCHEMY_DATABASE_URI")  # Load SQLAlchemy URI from .env
-app.config['SECRET_KEY'] = 'AJFISsbfid925bfsdfh3'  # Set your secret key here
 db = SQLAlchemy(app)
-bcrypt = Bcrypt(app)
-csrf = CSRFProtect(app)
-
-# Configure SQLAlchemy
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("SQLALCHEMY_DATABASE_URI")
 
 class User(db.Model):
     user_id = db.Column(db.Integer, primary_key=True)
-    work_email = db.Column(db.String(120), unique=True, nullable=False)
-    password = db.Column(db.String(60), nullable=False)
-
-    def __init__(self, work_email, password):
-        self.work_email = work_email
-        self.password = bcrypt.generate_password_hash(password).decode('utf-8')
-
+    work_email = db.Column(db.String(100), unique=True, nullable=False)
+    password = db.Column(db.String(100), nullable=False)
 
 
 @app.route('/api/login', methods=['POST'])
 def login():
     data = request.get_json()
+    work_email = data.get('work_email')
+    password = data.get('password')
 
-    # Check if the request contains a username and password
-    if 'work_email' not in data or 'password' not in data:
-        return jsonify({'message': 'Missing work_email or password'}), 400
+    # Check if the user exists
+    user = User.query.filter_by(work_email=work_email).first()
 
-    # Try to find a user with the provided username
-    user = User.query.filter_by(work_email=data['work_email']).first()
-
-    if user and bcrypt.check_password_hash(user.password, data['password']):
-        # Password is correct, generate a token or session here if needed
-        return jsonify({'message': 'Login successful'})
+    if user and user.password == password:
+        # Authentication successful
+        return jsonify({"message": "Login successful"}), 200
     else:
-        return jsonify({'message': 'Invalid username or password'}), 401
-
-
+        # Authentication failed
+        return jsonify({"message": "Login failed"}), 401
 
 
 if __name__ == '__main__':
