@@ -48,20 +48,24 @@ def login():
 
 @app.route('/api/logout', methods=['POST'])
 def logout():
-    # Assuming you have some form of user authentication, get the current user
-    # You may use session management, JWT, or some other method to identify the user
-    # For demonstration purposes, let's assume you get the user's ID from the request
-    user_id = request.form.get('user_id')
+    # Get the user_id from the session
+    user_id = session.get('user_id')
 
-    # Find the user by ID
-    user = User.query.get(user_id)
+    if user_id is not None:
+        # Find the user by ID
+        user = User.query.get(user_id)
 
-    if user:
-        user.logged_in = 0  # Set the logged_in status to 0 to indicate logout
-        db.session.commit()  # Commit the changes to the database
-        return jsonify({"message": "Logout successful"}), 200
+        if user:
+            user.logged_in = 0  # Set the logged_in status to 0 to indicate logout
+            db.session.commit()  # Commit the changes to the database
+            # Remove the user_id from the session to log out the user
+            session.pop('user_id', None)
+            return jsonify({"message": "Logout successful"}), 200
+        else:
+            return jsonify({"message": "User not found"}), 404
     else:
-        return jsonify({"message": "User not found"}), 404
+        return jsonify({"message": "User not logged in"}), 401
+
 
 if __name__ == '__main__':
     app.run(debug=True, host='100.118.102.62', port=5000)
