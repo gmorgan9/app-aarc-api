@@ -1,90 +1,78 @@
 from flask import Flask, jsonify, request, session
-from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
+from werkzeug.security import generate_password_hash, check_password_hash
 import os
 import secrets
 from flask_cors import CORS
-from flask_bcrypt import Bcrypt
+from datetime import timedelta
+
+import psycopg2 
+import psycopg2.extras
 
 load_dotenv()  # Load environment variables from .env
 
 app = Flask(__name__)
-CORS(app, resources={r"/api/*": {"origins": "*"}})
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("SQLALCHEMY_DATABASE_URI")  # Load SQLAlchemy URI from .env
-db = SQLAlchemy(app)
-bcrypt = Bcrypt(app)
+CORS(app)
+app.config['PERMANENT_SESSION_LIFETIME'] =  timedelta(minutes=10)
 app.secret_key = secrets.token_hex(16)
 
-class User(db.Model):
-    __tablename__ = 'users'
-    user_id = db.Column(db.Integer, primary_key=True)
-    work_email = db.Column(db.String(100), unique=True, nullable=False)
-    password = db.Column(db.String(100), nullable=False)
-    logged_in = db.Column(db.Integer, default=0)  # Set logged_in as an integer
+DB_NAME: os.getenv("DB_NAME")
+DB_USER: os.getenv("DB_USER")
+DB_PASS: os.getenv("DB_PASSWORD")
+DB_HOST: os.getenv("DB_HOST")
+DB_PORT: os.getenv("DB_PORT")
 
+conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST, port=DB_PORT)
 
-
-@app.route('/api/login', methods=['POST'])
-def login():
-    work_email = request.form.get('work_email')
-    password = request.form.get('password')
-
-    # Check if the user exists
-    user = User.query.filter_by(work_email=work_email).first()
-
-    if user and bcrypt.check_password_hash(user.password, password):
-        # Authentication successful
-        user.logged_in = 1  # Set the logged_in status to 1
-        db.session.commit()  # Commit the changes to the database
-
-        # Set session items
-        session['user_id'] = user.user_id  # You can store any user-related data in the session
-
-        return jsonify({"message": "Login successful"}), 200
+@app.route('/')
+def home():
+    passhash = generate_password_hash('cairocoders')
+    print(passhash)
+    if 'work_email' in session:
+        work_email = session['work_email']
+        return jsonify({'message' : 'You are already logged in', 'work_email' : work_email})
     else:
-        # Authentication failed
-        return jsonify({"message": "Login failed"}), 401
+        resp = jsonify({'message' : 'Unauthorized'})
+        resp.status_code = 401
+        return resp
     
-
-@app.route('/api/userdata', methods=['GET'])
-def userdata():
-    # Check if the user is logged in (you can add more checks if needed)
-    if 'user_id' in session:
-        user_id = session['user_id']
-        user = User.query.get(user_id)
-        
-        if user:
-            # Return user data as JSON
-            return jsonify({
-                "user_id": user.user_id,
-                "work_email": user.work_email,
-                "logged_in": user.logged_in
-            }), 200
-        else:
-            return jsonify({"message": "User not found"}), 404
+@app.route('/login', methods=['POST'])
+def login():
+    _json = request.json
+    _work_email = _json['work_email']
+    _password = _json['password']
+    print(_password)
+    # validate the received values
+    if _work_email and _password:
+        #check user exists          
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+          
+        sql = "SELECT * FROM users WHERE work_email=%s"
+        sql_where = (_work_email,)
+          
+        cursor.execute(sql, sql_where)
+        row = cursor.fetchone()
+        work_email = row['work_email']
+        password = row['password']
+        if row:
+            if check_password_hash(password, _password):
+                session['work_email'] = work_email
+                cursor.close()
+                return jsonify({'message' : 'You are logged in successfully'})
+            else:
+                resp = jsonify({'message' : 'Bad Request - invalid password'})
+                resp.status_code = 400
+                return resp
     else:
-        return jsonify({"message": "User not logged in"}), 401
-
-
-@app.route('/api/logout', methods=['POST'])
+        resp = jsonify({'message' : 'Bad Request - invalid credendtials'})
+        resp.status_code = 400
+        return resp
+    
+@app.route('/logout')
 def logout():
-    # Get the user_id from the session
-    user_id = session.get('user_id')
-
-    if user_id is not None:
-        # Find the user by ID
-        user = User.query.get(user_id)
-
-        if user:
-            user.logged_in = 0  # Set the logged_in status to 0 to indicate logout
-            db.session.commit()  # Commit the changes to the database
-            # Remove the user_id from the session to log out the user
-            session.pop('user_id', None)
-            return jsonify({"message": "Logout successful"}), 200
-        else:
-            return jsonify({"message": "User not found"}), 404
-    else:
-        return jsonify({"message": "User not logged in"}), 401
+    if 'work_email' in session:
+        session.pop('work_email', None)
+    return jsonify({'message' : 'You successfully logged out'})
 
 
 if __name__ == '__main__':
