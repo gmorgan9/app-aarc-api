@@ -9,18 +9,20 @@ from datetime import timedelta
 import psycopg2 
 import psycopg2.extras
 
-load_dotenv()  # Load environment variables from .env
 
 app = Flask(__name__)
 CORS(app)
 app.config['PERMANENT_SESSION_LIFETIME'] =  timedelta(minutes=10)
 app.secret_key = secrets.token_hex(16)
 
-DB_NAME: os.getenv("DB_NAME")
-DB_USER: os.getenv("DB_USER")
-DB_PASS: os.getenv("DB_PASSWORD")
-DB_HOST: os.getenv("DB_HOST")
-DB_PORT: os.getenv("DB_PORT")
+load_dotenv()
+
+# Access environment variables
+DB_NAME = os.getenv("DB_NAME")
+DB_USER = os.getenv("DB_USER")
+DB_PASS = os.getenv("DB_PASSWORD")
+DB_HOST = os.getenv("DB_HOST")
+DB_PORT = os.getenv("DB_PORT")
 
 conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST, port=DB_PORT)
 
