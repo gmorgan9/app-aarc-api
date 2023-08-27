@@ -22,7 +22,7 @@ secret_key = secrets.token_hex(16)  # Change the length as needed
 # Set the Flask app's secret key
 app.secret_key = secret_key
 
-csrf = CSRFProtect(app)
+csrf = CSRFProtect(app)  # Initialize CSRF protection after setting secret key
 
 # Configure SQLAlchemy
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("SQLALCHEMY_DATABASE_URI")
