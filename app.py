@@ -68,6 +68,7 @@ def login():
                 update_cursor.close()
                 
                 session['work_email'] = _work_email
+                session['user_id'] = user_id
                 cursor.close()
                 return jsonify({'message': 'You are logged in successfully'})
             else:
@@ -83,6 +84,13 @@ def login():
 @app.route('/logout')
 def logout():
     if 'work_email' in session:
+        
+        update_cursor = conn.cursor()
+        user_id = session.get('user_id')
+        update_sql = "UPDATE users SET logged_in = 1 WHERE user_id = %s"
+        update_cursor.execute(update_sql, (user_id,))
+        conn.commit()
+        update_cursor.close()
         session.pop('work_email', None)
     return jsonify({'message' : 'You successfully logged out'})
 
