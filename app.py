@@ -44,6 +44,7 @@ from flask import Flask, request, jsonify, session
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user
 from flask_session import Session
+from flask_cors import CORS
 
 # Define your SQL query to check login credentials
 CHECK_LOGIN = """SELECT user_id, work_email, password FROM users WHERE work_email = %s;"""
@@ -53,6 +54,7 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.urandom(24)  # Set a secret key for session security
 bcrypt = Bcrypt(app)
+CORS(app)
 
 url = os.getenv("DATABASE_URL")
 connection = psycopg2.connect(url)
