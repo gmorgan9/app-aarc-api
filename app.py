@@ -12,9 +12,11 @@ CHECK_LOGIN = """SELECT user_id, work_email, password FROM users WHERE work_emai
 load_dotenv()
 
 app = Flask(__name__)
+app.secret_key = 'your_secret_key'  # Set a secret key for session security
+bcrypt = Bcrypt(app)
+
 url = os.getenv("DATABASE_URL")
 connection = psycopg2.connect(url)
-bcrypt = Bcrypt(app)
 login_manager = LoginManager(app)
 app.config['SESSION_TYPE'] = 'filesystem'  # Use filesystem to store sessions
 Session(app)
@@ -35,31 +37,43 @@ def load_user(user_id):
             if user_data:
                 return User(user_data[0], user_data[1])
 
-@app.post("/api/login")
+@app.route('/api/login', methods=['POST'])
 def login():
+    # Get login credentials from the request data
     data = request.get_json()
-    work_email = data.get("work_email")
+    username = data.get("username")
     password = data.get("password")
 
-    with connection:
-        with connection.cursor() as cursor:
-            cursor.execute(CHECK_LOGIN, (work_email,))
-            user_data = cursor.fetchone()
-
-    if user_data and bcrypt.check_password_hash(user_data[2], password):
-        user = User(user_data[0], work_email)
-        login_user(user)  # Log the user in
-        session['user_id'] = user.id  # Store user's ID in the session
+    # Check the credentials (you should validate against your database)
+    if username == 'your_username' and bcrypt.check_password_hash('your_hashed_password', password):
+        session['username'] = username  # Store the username in the session
         return jsonify({"message": "Login successful"})
     else:
         return jsonify({"error": "Invalid credentials"}), 401
 
-@app.route("/api/logout")
-@login_required  # Requires authentication
+@app.route('/api/logout')
 def logout():
-    logout_user()  # Log the user out
-    session.pop('user_id', None)  # Remove user's ID from the session
+    session.pop('username', None)  # Remove the username from the session
     return jsonify({"message": "Logged out"})
+
+@app.route('/api/profile')
+def profile():
+    # Check if a user is logged in
+    if 'username' in session:
+        username = session['username']
+        return f"Welcome, {username}! This is your profile."
+    else:
+        return "You are not logged in."
+
+@app.route('/api/check_login')
+def check_login():
+    # Check if a user is logged in
+    if 'username' in session:
+        return jsonify({"loggedIn": True})
+    else:
+        return jsonify({"loggedIn": False})
+
+
 
 if __name__ == '__main__':
     app.secret_key = os.urandom(24)
