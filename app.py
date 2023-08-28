@@ -6,6 +6,9 @@ from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user
 from flask_session import Session
 from flask_cors import CORS
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+
+
 
 # Define your SQL query to check login credentials
 CHECK_LOGIN = """SELECT user_id, work_email, password FROM users WHERE work_email = %s;"""
@@ -16,6 +19,7 @@ app = Flask(__name__)
 app.secret_key = os.urandom(24)  # Set a secret key for session security
 bcrypt = Bcrypt(app)
 CORS(app)
+jwt = JWTManager(app)
 
 url = os.getenv("DATABASE_URL")
 connection = psycopg2.connect(url)
@@ -54,12 +58,8 @@ def login():
 
             if user_data and bcrypt.check_password_hash(user_data[2], password):
                 # User exists in the database and the password is correct
-                session['work_email'] = work_email  # Store the work_email in the session
-
-                # Log session data for debugging
-                app.logger.info("Session Data: %s", session)
-
-                return jsonify({"message": "Login successful"})
+                access_token = create_access_token(identity=user_data[0])
+                return jsonify({"message": "Login successful", "accessToken": access_token})
             else:
                 # Invalid credentials
                 return jsonify({"error": "Invalid credentials"}), 401
@@ -68,6 +68,12 @@ def login():
 def logout():
     session.pop('work_email', None)  # Remove the work_email from the session
     return jsonify({"message": "Logged out"})
+
+@app.route('/api/protected', methods=['GET'])
+@jwt_required()
+def protected_route():
+    current_user = get_jwt_identity()
+    return jsonify({'message': 'This is a protected route', 'user_id': current_user})
 
 @app.route('/api/profile')
 @login_required
