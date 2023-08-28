@@ -1,92 +1,52 @@
-from flask import Flask, request, jsonify
-import jwt
-from datetime import datetime, timedelta
-from functools import wraps
-import secrets
+from flask import Flask, request
+from flask_restful import Resource, Api
+from flask_jwt_extended import (
+    JWTManager, jwt_required, create_access_token, get_jwt_identity
+)
 
 app = Flask(__name__)
+app.config['JWT_SECRET_KEY'] = 'your_secret_key'  # Change this to a secure secret key
+api = Api(app)
+jwt = JWTManager(app)
 
-# Generate a secure secret key
-app.config['SECRET_KEY'] = secrets.token_urlsafe(32)
 
-# Dummy user data for demonstration purposes
 users = {
-    'user1': 'password1',
-    'user2': 'password2'
+    'user1': {'password': 'password1', 'email': 'user1@example.com'},
+    'user2': {'password': 'password2', 'email': 'user2@example.com'}
 }
 
-# Helper function to generate JWT tokens
-def generate_token(username):
-    expiration_time = datetime.utcnow() + timedelta(hours=1)  # Token expiration time
-    payload = {'username': username, 'exp': expiration_time}
-    token = jwt.encode(payload, app.config['SECRET_KEY'], algorithm='HS256')
-    return token
 
-# Decorator function to protect routes that require authentication
-def token_required(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        token = request.headers.get('Authorization')
+class UserLogin(Resource):
+    def post(self):
+        data = request.get_json()
+        username = data.get('username')
+        password = data.get('password')
+        if username in users and users[username]['password'] == password:
+            access_token = create_access_token(identity=username)
+            return {'access_token': access_token}, 200
+        return {'message': 'Invalid credentials'}, 401
 
-        if not token:
-            return jsonify({'message': 'Token is missing!'}), 401
+class UserLogout(Resource):
+    @jwt_required()
+    def post(self):
+        # JWT revocation logic (if needed)
+        return {'message': 'Successfully logged out'}, 200
 
-        try:
-            data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
-            current_user = data['username']
-        except jwt.ExpiredSignatureError:
-            return jsonify({'message': 'Token has expired'}), 401
-        except jwt.InvalidTokenError:
-            return jsonify({'message': 'Invalid token'}), 401
-        except Exception as e:
-            print(f"Error decoding token: {e}")
-            return jsonify({'message': 'Token decoding error'}), 401
-
-        return f(current_user, *args, **kwargs)
-
-    return decorated
-
-# Route to handle user login and token generation
-# @app.route('/login', methods=['POST'])
-# def login():
-#     auth = request.authorization
-
-#     if not auth or not auth.username or not auth.password:
-#         return jsonify({'message': 'Could not verify - auth'}), 401
-
-#     # Debugging
-#     print(f"Received username: {auth.username}, password: {auth.password}")
-
-#     if users.get(auth.username) == auth.password:
-#         token = generate_token(auth.username)
-#         return jsonify({'token': token})
-
-#     return jsonify({'message': 'Could not verify'}), 401
-
-@app.route('/login', methods=['POST'])
-def login():
-    auth = request.authorization
-
-    if not auth or not auth.username or not auth.password:
-        return "Authentication required", 401
-
-    username = auth.username
-    password = auth.password
-
-    # Here, you can perform authentication using the username and password.
-    # This is typically where you would check if the credentials are valid.
-
-    if username == "user1" and password == "password1":
-        return "Authentication successful"
-    else:
-        return "Authentication failed", 401
+api.add_resource(UserLogin, '/login')
+api.add_resource(UserLogout, '/logout')
 
 
-# Protected route to display user details
-@app.route('/user', methods=['GET'])
-@token_required
-def get_user(current_user):
-    return jsonify({'user': current_user})
+class UserProfile(Resource):
+    @jwt_required()
+    def get(self):
+        current_user = get_jwt_identity()
+        if current_user in users:
+            user_data = users[current_user]
+            return user_data, 200
+        return {'message': 'User not found'}, 404
+
+api.add_resource(UserProfile, '/profile')
+
 
 if __name__ == '__main__':
     app.run(debug=False, host='100.118.102.62', port=5000)
