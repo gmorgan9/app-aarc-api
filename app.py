@@ -73,13 +73,13 @@ def logout():
 
 @app.route('/api/profile')
 def profile():
-    work_email = session['work_email']
     # Check if a user is logged in
     if 'work_email' in session:
-        
+        work_email = session['work_email']
         return f"Welcome, {work_email}! This is your profile."
     else:
         return "You are not logged in."
+
 
 @app.route('/api/check_login')
 def check_login():
