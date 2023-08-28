@@ -1,42 +1,48 @@
-from flask import Flask, request, jsonify, session, g
+from flask import Flask, request, jsonify
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+from flask_bcrypt import Bcrypt
 
 app = Flask(__name__)
-
-# Set a secret key for session management (change this to something random)
-app.secret_key = 'test_secret'
+app.config['JWT_SECRET_KEY'] = 'your_jwt_secret'  # Change this to a strong, random secret key
+jwt = JWTManager(app)
+bcrypt = Bcrypt(app)
 
 # For demonstration purposes, let's have a dictionary to store user data.
 users = {
-    'user1': {'username': 'user1', 'password': 'password1', 'name': 'User One'},
-    'user2': {'username': 'user2', 'password': 'password2', 'name': 'User Two'}
+    'user1': {'username': 'user1', 'password': bcrypt.generate_password_hash('password1').decode('utf-8'), 'name': 'User One'},
+    'user2': {'username': 'user2', 'password': bcrypt.generate_password_hash('password2').decode('utf-8'), 'name': 'User Two'}
 }
 
 @app.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
-    username = data['username']
-    password = data['password']
+    username = data.get('username')
+    password = data.get('password')
 
-    # Check if the username and password match
     user = users.get(username)
-    if user and user['password'] == password:
-        session['user'] = user
-        return jsonify({'message': 'Login successful'})
+
+    if user and bcrypt.check_password_hash(user['password'], password):
+        access_token = create_access_token(identity=username)
+        return jsonify(access_token=access_token)
 
     return jsonify({'message': 'Login failed'}), 401
 
 @app.route('/logout', methods=['POST'])
+@jwt_required()
 def logout():
-    session.pop('user', None)
+    # Logout is handled by simply not using the JWT token anymore on the client-side.
     return jsonify({'message': 'Logged out'})
 
-@app.route('/user')
+@app.route('/user', methods=['GET'])
+@jwt_required()
 def get_user():
-    if 'user' in session:
-        user = session['user']
+    current_user = get_jwt_identity()
+    user = users.get(current_user)
+    
+    if user:
         return jsonify({'username': user['username'], 'name': user['name']})
-
-    return jsonify({'message': 'Not logged in'}), 401
+    
+    return jsonify({'message': 'User not found'}), 404
 
 if __name__ == '__main__':
     app.run(debug=False, host='100.118.102.62', port=5000)
