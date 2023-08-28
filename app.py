@@ -42,7 +42,7 @@ def token_required(f):
     return decorated
 
 # Route to handle user login and token generation
-@app.route('/api/auth/login', methods=['POST'])
+@app.route('/login', methods=['POST'])
 def login():
     auth = request.authorization
 
@@ -50,14 +50,13 @@ def login():
         return jsonify({'message': 'Could not verify'}), 401
 
     if users.get(auth.username) == auth.password:
-        # token = generate_token(auth.username)
-        token = "test_token"
+        token = generate_token(auth.username)
         return jsonify({'token': token})
 
     return jsonify({'message': 'Could not verify'}), 401
 
 # Protected route to display user details
-@app.route('/api/user', methods=['GET'])
+@app.route('/user', methods=['GET'])
 @token_required
 def get_user(current_user):
     return jsonify({'user': current_user})
