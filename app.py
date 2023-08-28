@@ -90,9 +90,9 @@ def get_user():
         if user_details:
             # Convert the result to a dictionary for JSON serialization
             user_dict = {
-                'work_email': user_details[0],
-                'other_field1': user_details[1],
-                'other_field2': user_details[2],
+                'user_id': user_details[0],
+                'first_name': user_details[1],
+                'last_name': user_details[2],
                 # Add more fields as needed
             }
             
