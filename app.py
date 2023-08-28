@@ -64,22 +64,19 @@ def login():
                 # Invalid credentials
                 return jsonify({"error": "Invalid credentials"}), 401
 
-
-
 @app.route('/api/logout')
 def logout():
     session.pop('work_email', None)  # Remove the work_email from the session
     return jsonify({"message": "Logged out"})
 
 @app.route('/api/profile')
+@login_required  # Protect this route, only authenticated users can access it
 def profile():
-    # Check if a user is logged in
-    if 'work_email' in session:
-        work_email = session['work_email']
-        return f"Welcome, {work_email}! This is your profile."
-    else:
-        return "You are not logged in."
-
+    # Check if a user is logged in (no need to check session, @login_required does that)
+    work_email = session['work_email']
+    
+    # In a real application, you'd fetch more user data from the database here
+    return jsonify({"message": f"Welcome, {work_email}! This is your profile."})
 
 @app.route('/api/check_login')
 def check_login():
@@ -89,9 +86,6 @@ def check_login():
     else:
         return jsonify({"loggedIn": False})
 
-
-
 if __name__ == '__main__':
     app.secret_key = os.urandom(24)
     app.run(debug=True, host='100.118.102.62', port=5000)
-
