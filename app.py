@@ -19,8 +19,8 @@ app.secret_key = os.getenv('APP_SECRET')  # Replace with your secret key
 app.config['SESSION_TYPE'] = 'filesystem'  # Choose your session storage method
 app.config['SESSION_PERMANENT'] = False  # Session expires when the user closes the browser
 
-# Enable CORS for all routes
-CORS(app)
+# Enable CORS with credentials (allow cookies)
+CORS(app, supports_credentials=True)
 
 # Connect to the PostgreSQL database using the DATABASE_URL from .env
 db_url = os.getenv('DATABASE_URL')
