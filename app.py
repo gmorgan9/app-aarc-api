@@ -1,11 +1,10 @@
-from flask import Flask, request, jsonify, make_response, session
+from flask import Flask, request, jsonify, make_response
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from flask_bcrypt import Bcrypt
 import os
 import psycopg2
 from dotenv import load_dotenv
 from flask_cors import CORS
-from flask_session import Session
 
 # Load environment variables from .env file
 load_dotenv()
@@ -21,7 +20,6 @@ app.config['SESSION_PERMANENT'] = False  # Session expires when the user closes 
 
 # Enable CORS for all routes
 CORS(app)
-Session(app)
 
 # Connect to the PostgreSQL database using the DATABASE_URL from .env
 db_url = os.getenv('DATABASE_URL')
@@ -44,11 +42,14 @@ def login():
         # Set logged_in status to 1 for the user
         cursor.execute("UPDATE users SET logged_in = 1 WHERE work_email = %s", (work_email,))
         conn.commit()  # Commit the update
-
-        # Store the access token in the session (cookie)
-        session['access_token'] = create_access_token(identity=work_email)
         
-        return jsonify({'message': 'Login successful'})
+        access_token = create_access_token(identity=work_email)
+        
+        # Set the access token as a secure HTTP-only cookie
+        resp = make_response(jsonify({'message': 'Login successful'}))
+        resp.set_cookie('access_token', access_token, secure=True, httponly=True)
+        
+        return resp
 
     return jsonify({'message': 'Login failed'}), 401
 
@@ -61,11 +62,13 @@ def logout():
     cursor.execute("UPDATE users SET logged_in = 0 WHERE work_email = %s", (current_user,))
     conn.commit()  # Commit the update
     
-    # Clear the access token from the session (cookie)
-    session.pop('access_token', None)
-    
     # Logout is handled by simply not using the JWT token anymore on the client-side.
-    return jsonify({'message': 'Logged out'})
+    
+    # Clear the access token cookie on logout
+    resp = make_response(jsonify({'message': 'Logged out'}))
+    resp.delete_cookie('access_token')
+    
+    return resp
 
 @app.route('/user', methods=['GET'])
 @jwt_required()
