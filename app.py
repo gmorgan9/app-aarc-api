@@ -59,10 +59,12 @@ def login():
             if user_data and bcrypt.check_password_hash(user_data[2], password):
                 # User exists in the database and the password is correct
                 access_token = create_access_token(identity=user_data[0])
+                print(f"Access Token: {access_token}")  # Print the access token
                 return jsonify({"message": "Login successful", "accessToken": access_token})
             else:
                 # Invalid credentials
                 return jsonify({"error": "Invalid credentials"}), 401
+
 
 @app.route('/api/logout')
 def logout():
