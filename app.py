@@ -55,10 +55,15 @@ def login():
             if user_data and bcrypt.check_password_hash(user_data[2], password):
                 # User exists in the database and the password is correct
                 session['work_email'] = work_email  # Store the work_email in the session
+
+                # Print/log session data for debugging
+                print(session)  # Check your server logs or console for this output
+
                 return jsonify({"message": "Login successful"})
             else:
                 # Invalid credentials
                 return jsonify({"error": "Invalid credentials"}), 401
+
 
 
 @app.route('/api/logout')
