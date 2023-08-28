@@ -79,9 +79,13 @@ def logout():
 @jwt_required()
 def get_user():
     current_user = get_jwt_identity()
+    print(f"User {current_user} is trying to access user details.")
+    
     # You can query the database to fetch user details here if needed.
 
+    print("User details fetched successfully.")
     return jsonify({'work_email': current_user, 'message': 'User details fetched'})
+
 
 if __name__ == '__main__':
     app.run(debug=False, host='100.118.102.62', port=5000)
