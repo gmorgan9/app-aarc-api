@@ -1,9 +1,10 @@
 from flask import Flask, request, jsonify
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from flask_bcrypt import Bcrypt
+import secrets
 
 app = Flask(__name__)
-app.config['JWT_SECRET_KEY'] = 'your_jwt_secret'  # Change this to a strong, random secret key
+app.config['JWT_SECRET_KEY'] = secrets.token_hex(16)  # Change this to a strong, random secret key
 jwt = JWTManager(app)
 bcrypt = Bcrypt(app)
 
