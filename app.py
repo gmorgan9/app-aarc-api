@@ -1,52 +1,42 @@
-from flask import Flask, request
-from flask_restful import Resource, Api
-from flask_jwt_extended import (
-    JWTManager, jwt_required, create_access_token, get_jwt_identity
-)
+from flask import Flask, request, jsonify, session, g
 
 app = Flask(__name__)
-app.config['JWT_SECRET_KEY'] = 'new_secret'  # Change this to a secure secret key
-api = Api(app)
-jwt = JWTManager(app)
 
+# Set a secret key for session management (change this to something random)
+app.secret_key = 'your_secret_key'
 
+# For demonstration purposes, let's have a dictionary to store user data.
 users = {
-    'user1': {'password': 'password1', 'email': 'user1@example.com'},
-    'user2': {'password': 'password2', 'email': 'user2@example.com'}
+    'user1': {'username': 'user1', 'password': 'password1', 'name': 'User One'},
+    'user2': {'username': 'user2', 'password': 'password2', 'name': 'User Two'}
 }
 
+@app.route('/login', methods=['POST'])
+def login():
+    data = request.get_json()
+    username = data['username']
+    password = data['password']
 
-class UserLogin(Resource):
-    def post(self):
-        data = request.get_json()
-        username = data.get('username')
-        password = data.get('password')
-        if username in users and users[username]['password'] == password:
-            access_token = create_access_token(identity=username)
-            return {'access_token': access_token}, 200
-        return {'message': 'Invalid credentials'}, 401
+    # Check if the username and password match
+    user = users.get(username)
+    if user and user['password'] == password:
+        session['user'] = user
+        return jsonify({'message': 'Login successful'})
 
-class UserLogout(Resource):
-    @jwt_required()
-    def post(self):
-        # JWT revocation logic (if needed)
-        return {'message': 'Successfully logged out'}, 200
+    return jsonify({'message': 'Login failed'}), 401
 
-api.add_resource(UserLogin, '/login')
-api.add_resource(UserLogout, '/logout')
+@app.route('/logout', methods=['POST'])
+def logout():
+    session.pop('user', None)
+    return jsonify({'message': 'Logged out'})
 
+@app.route('/user')
+def get_user():
+    if 'user' in session:
+        user = session['user']
+        return jsonify({'username': user['username'], 'name': user['name']})
 
-class UserProfile(Resource):
-    @jwt_required()
-    def get(self):
-        current_user = get_jwt_identity()
-        if current_user in users:
-            user_data = users[current_user]
-            return user_data, 200
-        return {'message': 'User not found'}, 404
-
-api.add_resource(UserProfile, '/profile')
-
+    return jsonify({'message': 'Not logged in'}), 401
 
 if __name__ == '__main__':
     app.run(debug=False, host='100.118.102.62', port=5000)
