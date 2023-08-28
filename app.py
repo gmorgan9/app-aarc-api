@@ -54,11 +54,15 @@ def login():
     if not auth or not auth.username or not auth.password:
         return jsonify({'message': 'Could not verify'}), 401
 
+    # Debugging
+    print(f"Received username: {auth.username}, password: {auth.password}")
+
     if users.get(auth.username) == auth.password:
         token = generate_token(auth.username)
         return jsonify({'token': token})
 
     return jsonify({'message': 'Could not verify'}), 401
+
 
 # Protected route to display user details
 @app.route('/user', methods=['GET'])
