@@ -16,8 +16,18 @@ def home():
     with connection:
         with connection.cursor() as cursor:
             cursor.execute(GET_USERS)
-            users = cursor.fetchone()[0]
-    return jsonify({"users": users})
+            users_data = cursor.fetchall()  # Fetch all user data
+    users_list = []
+    for user in users_data:
+        user_dict = {
+            "user_id": user[0],
+            "first_name": user[1],
+            "last_name": user[2],
+            "work_email": user[3],
+            # Add more fields as needed
+        }
+        users_list.append(user_dict)
+    return jsonify({"users": users_list})
 
 if __name__ == '__main__':
     app.run(debug=True, host='100.118.102.62', port=5000)
