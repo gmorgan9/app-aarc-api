@@ -56,8 +56,8 @@ def login():
                 # User exists in the database and the password is correct
                 session['work_email'] = work_email  # Store the work_email in the session
 
-                # Print/log session data for debugging
-                print(session)  # Check your server logs or console for this output
+                # Log session data for debugging
+                app.logger.info("Session Data: %s", session)
 
                 return jsonify({"message": "Login successful"})
             else:
