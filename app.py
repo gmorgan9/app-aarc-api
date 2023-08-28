@@ -5,6 +5,7 @@ from flask_bcrypt import Bcrypt
 import os
 import psycopg2
 from dotenv import load_dotenv
+from flask_cors import CORS
 
 # Load environment variables from .env file
 load_dotenv()
@@ -13,6 +14,9 @@ app = Flask(__name__)
 app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')  # Read from .env
 jwt = JWTManager(app)
 bcrypt = Bcrypt(app)
+
+# Enable CORS for all routes
+CORS(app)
 
 # Connect to the PostgreSQL database using the DATABASE_URL from .env
 db_url = os.getenv('DATABASE_URL')
