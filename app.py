@@ -5,6 +5,7 @@ import os
 import psycopg2
 from dotenv import load_dotenv
 from flask_cors import CORS
+from flask_session import Session
 
 # Load environment variables from .env file
 load_dotenv()
@@ -20,6 +21,7 @@ app.config['SESSION_PERMANENT'] = False  # Session expires when the user closes 
 
 # Enable CORS for all routes
 CORS(app)
+Session(app)
 
 # Connect to the PostgreSQL database using the DATABASE_URL from .env
 db_url = os.getenv('DATABASE_URL')
@@ -43,12 +45,10 @@ def login():
         cursor.execute("UPDATE users SET logged_in = 1 WHERE work_email = %s", (work_email,))
         conn.commit()  # Commit the update
 
-        access_token = create_access_token(identity=work_email)
+        # Store the access token in the session (cookie)
+        session['access_token'] = create_access_token(identity=work_email)
         
-        # Create a response with a cookie for the access token
-        response = make_response(jsonify({'access_token': access_token}))
-        response.set_cookie('access_token', access_token, path='/')  # Adjust path as needed
-        return response
+        return jsonify({'message': 'Login successful'})
 
     return jsonify({'message': 'Login failed'}), 401
 
@@ -61,12 +61,11 @@ def logout():
     cursor.execute("UPDATE users SET logged_in = 0 WHERE work_email = %s", (current_user,))
     conn.commit()  # Commit the update
     
-    # Logout is handled by simply not using the JWT token anymore on the client-side.
+    # Clear the access token from the session (cookie)
+    session.pop('access_token', None)
     
-    # Clear the access token cookie
-    response = make_response(jsonify({'message': 'Logged out'}))
-    response.delete_cookie('access_token', path='/')  # Adjust path as needed
-    return response
+    # Logout is handled by simply not using the JWT token anymore on the client-side.
+    return jsonify({'message': 'Logged out'})
 
 @app.route('/user', methods=['GET'])
 @jwt_required()
