@@ -13,6 +13,8 @@ from flask_jwt_extended import JWTManager, create_access_token, jwt_required, ge
 # Define your SQL query to check login credentials
 CHECK_LOGIN = """SELECT user_id, work_email, password FROM users WHERE work_email = %s;"""
 
+GET_USER_DATA = """SELECT user_id, work_email, username, other_data FROM users WHERE user_id = %s;"""
+
 load_dotenv()
 
 app = Flask(__name__)
@@ -42,6 +44,8 @@ def load_user(user_id):
             user_data = cursor.fetchone()
             if user_data:
                 return User(user_data[0], user_data[1])
+            
+
 
 @app.route('/api/login', methods=['POST'])
 def login():
@@ -64,7 +68,34 @@ def login():
             else:
                 # Invalid credentials
                 return jsonify({"error": "Invalid credentials"}), 401
+            
+            
 
+@app.route('/api/user-data', methods=['GET'])
+@jwt_required()
+def user_data():
+    # Get the user_id from the JWT token
+    current_user_id = get_jwt_identity()
+    
+    # Fetch user data from the database based on the user_id
+    with connection:
+        with connection.cursor() as cursor:
+            cursor.execute(GET_USER_DATA, (current_user_id,))
+            user_data = cursor.fetchone()
+    
+    if user_data:
+        # Create a dictionary containing user data
+        user_info = {
+            "user_id": user_data[0],
+            "work_email": user_data[1],
+            "username": user_data[2],
+            "other_data": user_data[3]
+        }
+        
+        return jsonify(user_info)
+    else:
+        return jsonify({"message": "User not found"}), 404
+    
 
 @app.route('/api/logout')
 def logout():
