@@ -82,34 +82,42 @@ def load_user(user_id):
 def login():
     # Get login credentials from the request data
     data = request.get_json()
-    username = data.get("username")
+    work_email = data.get("work_email")
     password = data.get("password")
 
-    # Check the credentials (you should validate against your database)
-    if username == 'your_username' and bcrypt.check_password_hash('your_hashed_password', password):
-        session['username'] = username  # Store the username in the session
-        return jsonify({"message": "Login successful"})
-    else:
-        return jsonify({"error": "Invalid credentials"}), 401
+    # Check the credentials against the database
+    with connection:
+        with connection.cursor() as cursor:
+            cursor.execute(CHECK_LOGIN, (work_email,))
+            user_data = cursor.fetchone()
+
+            if user_data and bcrypt.check_password_hash(user_data[2], password):
+                # User exists in the database and the password is correct
+                session['work_email'] = work_email  # Store the work_email in the session
+                return jsonify({"message": "Login successful"})
+            else:
+                # Invalid credentials
+                return jsonify({"error": "Invalid credentials"}), 401
+
 
 @app.route('/api/logout')
 def logout():
-    session.pop('username', None)  # Remove the username from the session
+    session.pop('work_email', None)  # Remove the work_email from the session
     return jsonify({"message": "Logged out"})
 
 @app.route('/api/profile')
 def profile():
     # Check if a user is logged in
-    if 'username' in session:
-        username = session['username']
-        return f"Welcome, {username}! This is your profile."
+    if 'work_email' in session:
+        work_email = session['work_email']
+        return f"Welcome, {work_email}! This is your profile."
     else:
         return "You are not logged in."
 
 @app.route('/api/check_login')
 def check_login():
     # Check if a user is logged in
-    if 'username' in session:
+    if 'work_email' in session:
         return jsonify({"loggedIn": True})
     else:
         return jsonify({"loggedIn": False})
@@ -123,22 +131,22 @@ if __name__ == '__main__':
 
 @app.route('/api/logout')
 def logout():
-    session.pop('username', None)  # Remove the username from the session
+    session.pop('work_email', None)  # Remove the work_email from the session
     return jsonify({"message": "Logged out"})
 
 @app.route('/api/profile')
 def profile():
     # Check if a user is logged in
-    if 'username' in session:
-        username = session['username']
-        return f"Welcome, {username}! This is your profile."
+    if 'work_email' in session:
+        work_email = session['work_email']
+        return f"Welcome, {work_email}! This is your profile."
     else:
         return "You are not logged in."
 
 @app.route('/api/check_login')
 def check_login():
     # Check if a user is logged in
-    if 'username' in session:
+    if 'work_email' in session:
         return jsonify({"loggedIn": True})
     else:
         return jsonify({"loggedIn": False})
