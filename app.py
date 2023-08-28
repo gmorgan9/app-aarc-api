@@ -129,30 +129,30 @@ if __name__ == '__main__':
     app.run(debug=True, host='100.118.102.62', port=5000)
 
 
-@app.route('/api/logout')
-def logout():
-    session.pop('work_email', None)  # Remove the work_email from the session
-    return jsonify({"message": "Logged out"})
+# @app.route('/api/logout')
+# def logout():
+#     session.pop('work_email', None)  # Remove the work_email from the session
+#     return jsonify({"message": "Logged out"})
 
-@app.route('/api/profile')
-def profile():
-    # Check if a user is logged in
-    if 'work_email' in session:
-        work_email = session['work_email']
-        return f"Welcome, {work_email}! This is your profile."
-    else:
-        return "You are not logged in."
+# @app.route('/api/profile')
+# def profile():
+#     # Check if a user is logged in
+#     if 'work_email' in session:
+#         work_email = session['work_email']
+#         return f"Welcome, {work_email}! This is your profile."
+#     else:
+#         return "You are not logged in."
 
-@app.route('/api/check_login')
-def check_login():
-    # Check if a user is logged in
-    if 'work_email' in session:
-        return jsonify({"loggedIn": True})
-    else:
-        return jsonify({"loggedIn": False})
+# @app.route('/api/check_login')
+# def check_login():
+#     # Check if a user is logged in
+#     if 'work_email' in session:
+#         return jsonify({"loggedIn": True})
+#     else:
+#         return jsonify({"loggedIn": False})
 
 
 
-if __name__ == '__main__':
-    app.secret_key = os.urandom(24)
-    app.run(debug=True, host='100.118.102.62', port=5000)
+# if __name__ == '__main__':
+#     app.secret_key = os.urandom(24)
+#     app.run(debug=True, host='100.118.102.62', port=5000)
