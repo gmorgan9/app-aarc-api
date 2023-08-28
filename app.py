@@ -29,7 +29,7 @@ cursor = conn.cursor()
 
 # No need for the 'users' dictionary anymore
 
-@app.route('/login', methods=['POST'])
+@app.route('/api/login', methods=['POST'])
 def login():
     data = request.get_json()
     work_email = data.get('work_email')
@@ -49,7 +49,7 @@ def login():
 
     return jsonify({'message': 'Login failed'}), 401
 
-@app.route('/logout', methods=['POST'])
+@app.route('/api/logout', methods=['POST'])
 @jwt_required()
 def logout():
     current_user = get_jwt_identity()
@@ -62,7 +62,7 @@ def logout():
     return jsonify({'message': 'Logged out'})
 
 
-@app.route('/user', methods=['GET'])
+@app.route('/api/user', methods=['GET'])
 @jwt_required()
 def get_user():
     current_user = get_jwt_identity()
