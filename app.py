@@ -81,10 +81,15 @@ def get_user():
     current_user = get_jwt_identity()
     print(f"User {current_user} is trying to access user details.")
     
-    # You can query the database to fetch user details here if needed.
+    try:
+        # You can query the database to fetch user details here if needed.
 
-    print("User details fetched successfully.")
-    return jsonify({'work_email': current_user, 'message': 'User details fetched'})
+        print("User details fetched successfully.")
+        return jsonify({'work_email': current_user, 'message': 'User details fetched'})
+    except Exception as e:
+        print("Error:", str(e))
+        return jsonify({'error': 'An error occurred'}), 500
+
 
 
 if __name__ == '__main__':
