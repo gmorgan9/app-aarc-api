@@ -12,7 +12,7 @@ CHECK_LOGIN = """SELECT user_id, work_email, password FROM users WHERE work_emai
 load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'  # Set a secret key for session security
+app.secret_key = os.urandom(24)  # Set a secret key for session security
 bcrypt = Bcrypt(app)
 
 url = os.getenv("DATABASE_URL")
