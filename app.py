@@ -6,11 +6,8 @@ import secrets
 
 app = Flask(__name__)
 
-# Generate a random secret key
-def generate_secret_key():
-    return secrets.token_hex(16)  # 16 bytes provides a 32-character hexadecimal key
-
-app.config['SECRET_KEY'] = "test_token"  # Change this to a secure secret key
+# Generate a secure secret key
+app.config['SECRET_KEY'] = secrets.token_urlsafe(32)
 
 # Dummy user data for demonstration purposes
 users = {
