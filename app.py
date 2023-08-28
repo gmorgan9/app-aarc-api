@@ -18,7 +18,7 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.urandom(24)  # Set a secret key for session security
 bcrypt = Bcrypt(app)
-CORS(app)
+CORS(app, supports_credentials=True)
 jwt = JWTManager(app)
 
 url = os.getenv("DATABASE_URL")
