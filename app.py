@@ -1,4 +1,4 @@
-# working 8/28 12:15pm
+# Import the necessary modules
 from flask import Flask, request, jsonify, session, make_response
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from flask_bcrypt import Bcrypt
@@ -46,9 +46,12 @@ def login():
 
         access_token = create_access_token(identity=work_email)
 
-        # Create a response
+        # Create a response object
         response = make_response(jsonify({'message': 'Login successful'}))
-        response.set_cookie('access_token', access_token, httponly=True, secure=True)  # Set the access_token as a cookie
+
+        # Set the access token in an HTTP-only cookie
+        response.set_cookie('access_token', access_token, httponly=True)
+
         return response
 
     return jsonify({'message': 'Login failed'}), 401
@@ -57,14 +60,20 @@ def login():
 @jwt_required()
 def logout():
     current_user = get_jwt_identity()
-    
+
     # Set logged_in status to 0 for the user
     cursor.execute("UPDATE users SET logged_in = 0 WHERE work_email = %s", (current_user,))
     conn.commit()  # Commit the update
-    
-    # Logout is handled by simply not using the JWT token anymore on the client-side.
-    return jsonify({'message': 'Logged out'})
 
+    # Logout is handled by simply not using the JWT token anymore on the client-side.
+
+    # Create a response object
+    response = make_response(jsonify({'message': 'Logged out'}))
+
+    # Remove the access token by setting an empty token with an expired date
+    response.set_cookie('access_token', '', expires=0, httponly=True)
+
+    return response
 
 @app.route('/user', methods=['GET'])
 @jwt_required()
