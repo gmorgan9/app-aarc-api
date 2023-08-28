@@ -27,8 +27,6 @@ db_url = os.getenv('DATABASE_URL')
 conn = psycopg2.connect(db_url)
 cursor = conn.cursor()
 
-# No need for the 'users' dictionary anymore
-
 @app.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
@@ -50,7 +48,7 @@ def login():
         response = make_response(jsonify({'message': 'Login successful'}))
 
         # Set the access token in an HTTP-only cookie
-        response.set_cookie('access_token', access_token, httponly=True)
+        response.set_cookie('access_token', value=access_token, httponly=True)  # Updated here
 
         return response
 
@@ -71,7 +69,7 @@ def logout():
     response = make_response(jsonify({'message': 'Logged out'}))
 
     # Remove the access token by setting an empty token with an expired date
-    response.set_cookie('access_token', '', expires=0, httponly=True)
+    response.set_cookie('access_token', value='', expires=0, httponly=True)  # Updated here
 
     return response
 
@@ -89,8 +87,6 @@ def get_user():
     except Exception as e:
         print("Error:", str(e))
         return jsonify({'error': 'An error occurred'}), 500
-
-
 
 if __name__ == '__main__':
     app.run(debug=False, host='100.118.102.62', port=5000)
