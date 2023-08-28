@@ -1,7 +1,7 @@
 import os
 import psycopg2
 from dotenv import load_dotenv
-from flask import Flask, request, jsonify, session
+from flask import Flask, request, jsonify, session, make_response
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user
 from flask_session import Session
@@ -60,7 +60,12 @@ def login():
                 # User exists in the database and the password is correct
                 access_token = create_access_token(identity=user_data[0])
                 print(f"Access Token: {access_token}")  # Print the access token
-                return jsonify({"message": "Login successful", "accessToken": access_token})
+
+                # Create a response with an HttpOnly cookie
+                response = make_response(jsonify({"message": "Login successful"}))
+                response.set_cookie('access_token', access_token, httponly=True)  # Set the cookie
+
+                return response  # Return the response with the cookie
             else:
                 # Invalid credentials
                 return jsonify({"error": "Invalid credentials"}), 401
