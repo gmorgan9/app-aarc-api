@@ -1,5 +1,5 @@
 # working 8/28 12:15pm
-from flask import Flask, request, jsonify, session
+from flask import Flask, request, jsonify, session, make
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from flask_bcrypt import Bcrypt
 import os
@@ -43,9 +43,13 @@ def login():
         # Set logged_in status to 1 for the user
         cursor.execute("UPDATE users SET logged_in = 1 WHERE work_email = %s", (work_email,))
         conn.commit()  # Commit the update
-        
+
         access_token = create_access_token(identity=work_email)
-        return jsonify(access_token=access_token)
+
+        # Create a response
+        response = make_response(jsonify({'message': 'Login successful'}))
+        response.set_cookie('access_token', access_token, httponly=True, secure=True)  # Set the access_token as a cookie
+        return response
 
     return jsonify({'message': 'Login failed'}), 401
 
