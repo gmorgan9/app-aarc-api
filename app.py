@@ -45,7 +45,7 @@ def login():
         access_token = create_access_token(identity=work_email)
 
         # Create a response object
-        response = make_response(jsonify({'message': f'{access_token}'}))
+        response = make_response(jsonify({'message': 'Login successful'}))
 
         # Set the access token in an HTTP-only cookie
         response.set_cookie('access_token', value=access_token, httponly=True, secure=True, samesite='Strict')  # Updated here
@@ -72,7 +72,7 @@ def logout():
     response.set_cookie('access_token', value='', expires=0, httponly=True, secure=True, samesite='Strict')  # Updated here
 
     return response
-
+    
 @app.route('/user', methods=['GET'])
 @jwt_required()
 def get_user():
