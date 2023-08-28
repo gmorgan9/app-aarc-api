@@ -70,13 +70,14 @@ def logout():
     return jsonify({"message": "Logged out"})
 
 @app.route('/api/profile')
-@login_required  # Protect this route, only authenticated users can access it
+@login_required
 def profile():
-    # Check if a user is logged in (no need to check session, @login_required does that)
-    work_email = session['work_email']
-    
-    # In a real application, you'd fetch more user data from the database here
-    return jsonify({"message": f"Welcome, {work_email}! This is your profile."})
+    work_email = session.get('work_email')
+    if work_email:
+        return jsonify({"message": f"Welcome, {work_email}! This is your profile."})
+    else:
+        return jsonify({"message": "Not logged in, check it out on the api"})
+
 
 @app.route('/api/check_login')
 def check_login():
