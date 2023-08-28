@@ -104,10 +104,6 @@ def get_user():
     except Exception as e:
         print("Error:", str(e))
         return jsonify({'error': 'An error occurred'}), 500
-    finally:
-        # Close the database connection
-        if conn:
-            conn.close()
 
 if __name__ == '__main__':
     app.run(debug=False, host='100.118.102.62', port=5000)
