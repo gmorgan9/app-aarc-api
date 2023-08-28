@@ -1,131 +1,68 @@
-import os
-import psycopg2
-from dotenv import load_dotenv
-from flask import Flask, request, jsonify, session
-from flask_bcrypt import Bcrypt
-from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user
-from flask_session import Session
-from flask_cors import CORS
-from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
-
-
-
-# Define your SQL query to check login credentials
-CHECK_LOGIN = """SELECT user_id, work_email, password FROM users WHERE work_email = %s;"""
-
-GET_USER_DATA = """SELECT user_id, work_email, username, other_data FROM users WHERE user_id = %s;"""
-
-load_dotenv()
+from flask import Flask, request, jsonify
+import jwt
+from datetime import datetime, timedelta
+from functools import wraps
+import secrets
 
 app = Flask(__name__)
-app.secret_key = os.urandom(24)  # Set a secret key for session security
-bcrypt = Bcrypt(app)
-CORS(app, supports_credentials=True)
-jwt = JWTManager(app)
 
-url = os.getenv("DATABASE_URL")
-connection = psycopg2.connect(url)
-login_manager = LoginManager(app)
-app.config['SESSION_TYPE'] = 'filesystem'  # Use filesystem to store sessions
-Session(app)
+# Generate a random secret key
+def generate_secret_key():
+    return secrets.token_hex(16)  # 16 bytes provides a 32-character hexadecimal key
 
-# User model for Flask-Login
-class User(UserMixin):
-    def __init__(self, user_id, work_email):
-        self.id = user_id
-        self.work_email = work_email
+app.config['SECRET_KEY'] = generate_secret_key()  # Change this to a secure secret key
 
-# Configure Flask-Login to load users
-@login_manager.user_loader
-def load_user(user_id):
-    with connection:
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT user_id, work_email FROM users WHERE user_id = %s;", (user_id,))
-            user_data = cursor.fetchone()
-            if user_data:
-                return User(user_data[0], user_data[1])
-            
+# Dummy user data for demonstration purposes
+users = {
+    'user1': 'password1',
+    'user2': 'password2'
+}
 
+# Helper function to generate JWT tokens
+def generate_token(username):
+    expiration_time = datetime.utcnow() + timedelta(hours=1)  # Token expiration time
+    payload = {'username': username, 'exp': expiration_time}
+    token = jwt.encode(payload, app.config['SECRET_KEY'], algorithm='HS256')
+    return token
 
-@app.route('/api/login', methods=['POST'])
+# Decorator function to protect routes that require authentication
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = request.headers.get('Authorization')
+
+        if not token:
+            return jsonify({'message': 'Token is missing!'}), 401
+
+        try:
+            data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
+            current_user = data['username']
+        except:
+            return jsonify({'message': 'Token is invalid!'}), 401
+
+        return f(current_user, *args, **kwargs)
+
+    return decorated
+
+# Route to handle user login and token generation
+@app.route('/api/auth/login', methods=['POST'])
 def login():
-    # Get login credentials from the request data
-    data = request.get_json()
-    work_email = data.get("work_email")
-    password = data.get("password")
+    auth = request.authorization
 
-    # Check the credentials against the database
-    with connection:
-        with connection.cursor() as cursor:
-            cursor.execute(CHECK_LOGIN, (work_email,))
-            user_data = cursor.fetchone()
+    if not auth or not auth.username or not auth.password:
+        return jsonify({'message': 'Could not verify'}), 401
 
-            if user_data and bcrypt.check_password_hash(user_data[2], password):
-                # User exists in the database and the password is correct
-                access_token = create_access_token(identity=user_data[0])
-                print(f"Access Token: {access_token}")  # Print the access token
-                return jsonify({"message": "Login successful", "accessToken": access_token})
-            else:
-                # Invalid credentials
-                return jsonify({"error": "Invalid credentials"}), 401
-            
-            
+    if users.get(auth.username) == auth.password:
+        token = generate_token(auth.username)
+        return jsonify({'token': token})
 
-@app.route('/api/user-data', methods=['GET'])
-@jwt_required()
-def user_data():
-    # Get the user_id from the JWT token
-    current_user_id = get_jwt_identity()
-    
-    # Fetch user data from the database based on the user_id
-    with connection:
-        with connection.cursor() as cursor:
-            cursor.execute(GET_USER_DATA, (current_user_id,))
-            user_data = cursor.fetchone()
-    
-    if user_data:
-        # Create a dictionary containing user data
-        user_info = {
-            "user_id": user_data[0],
-            "work_email": user_data[1],
-            "username": user_data[2],
-            "other_data": user_data[3]
-        }
-        
-        return jsonify(user_info)
-    else:
-        return jsonify({"message": "User not found"}), 404
-    
+    return jsonify({'message': 'Could not verify'}), 401
 
-@app.route('/api/logout')
-def logout():
-    session.pop('work_email', None)  # Remove the work_email from the session
-    return jsonify({"message": "Logged out"})
-
-@app.route('/api/protected', methods=['GET'])
-@jwt_required()
-def protected_route():
-    current_user = get_jwt_identity()
-    return jsonify({'message': 'This is a protected route', 'user_id': current_user})
-
-@app.route('/api/profile')
-@login_required
-def profile():
-    work_email = session.get('work_email')
-    if work_email:
-        return jsonify({"message": f"Welcome, {work_email}! This is your profile."})
-    else:
-        return jsonify({"message": "Not logged in, check it out on the api"})
-
-
-@app.route('/api/check_login')
-def check_login():
-    # Check if a user is logged in
-    if 'work_email' in session:
-        return jsonify({"loggedIn": True})
-    else:
-        return jsonify({"loggedIn": False})
+# Protected route to display user details
+@app.route('/api/user', methods=['GET'])
+@token_required
+def get_user(current_user):
+    return jsonify({'user': current_user})
 
 if __name__ == '__main__':
-    app.secret_key = os.urandom(24)
-    app.run(debug=True, host='100.118.102.62', port=5000)
+    app.run(debug=False, host='100.118.102.62', port=5000)
