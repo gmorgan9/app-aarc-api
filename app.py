@@ -3,7 +3,7 @@ from flask import Flask, request, jsonify, session, g
 app = Flask(__name__)
 
 # Set a secret key for session management (change this to something random)
-app.secret_key = 'your_secret_key'
+app.secret_key = 'test_secret'
 
 # For demonstration purposes, let's have a dictionary to store user data.
 users = {
