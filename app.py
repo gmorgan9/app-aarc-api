@@ -31,16 +31,28 @@ def login():
     row = cursor.fetchone()
 
     if row and bcrypt.check_password_hash(row[1], password):
+        # Set logged_in status to 1 for the user
+        cursor.execute("UPDATE users SET logged_in = 1 WHERE work_email = %s", (work_email,))
+        conn.commit()  # Commit the update
+        
         access_token = create_access_token(identity=work_email)
         return jsonify(access_token=access_token)
 
     return jsonify({'message': 'Login failed'}), 401
 
+
 @app.route('/logout', methods=['POST'])
 @jwt_required()
 def logout():
+    current_user = get_jwt_identity()
+    
+    # Set logged_in status to 0 for the user
+    cursor.execute("UPDATE users SET logged_in = 0 WHERE work_email = %s", (current_user,))
+    conn.commit()  # Commit the update
+    
     # Logout is handled by simply not using the JWT token anymore on the client-side.
     return jsonify({'message': 'Logged out'})
+
 
 @app.route('/user', methods=['GET'])
 @jwt_required()
