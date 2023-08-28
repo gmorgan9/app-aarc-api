@@ -45,10 +45,10 @@ def login():
         access_token = create_access_token(identity=work_email)
 
         # Create a response object
-        response = make_response(jsonify({'message': f'Login successful -- {access_token}'}))
+        response = make_response(jsonify({'message': 'Login successful'}))
 
         # Set the access token in an HTTP-only cookie
-        response.set_cookie('access_token', value=access_token, httponly=True)  # Updated here
+        response.set_cookie('access_token', value=access_token, httponly=True, secure=True, samesite='Strict')  # Updated here
 
         return response
 
