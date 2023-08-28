@@ -45,7 +45,7 @@ def token_required(f):
     return decorated
 
 # Route to handle user login and token generation
-@app.route('/login', methods=['POST'])
+@app.route('/api/auth/login', methods=['POST'])
 def login():
     auth = request.authorization
 
@@ -54,11 +54,9 @@ def login():
 
     if users.get(auth.username) == auth.password:
         token = generate_token(auth.username)
-        print(f"Generated JWT token: {token}")  # Print the token to the console
         return jsonify({'token': token})
 
     return jsonify({'message': 'Could not verify'}), 401
-
 
 # Protected route to display user details
 @app.route('/api/user', methods=['GET'])
