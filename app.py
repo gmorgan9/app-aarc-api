@@ -1,5 +1,5 @@
 # Import the necessary modules
-from flask import Flask, request, jsonify, session, make_response
+from flask import Flask, request, jsonify, session, make_response, redirect
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from flask_bcrypt import Bcrypt
 import os
@@ -51,6 +51,8 @@ def login():
         response.set_cookie('access_token', value=access_token, httponly=True, secure=True, samesite='Strict')  # Updated here
 
         return response
+    if response.ok:
+        return redirect('https://app-aarc.morganserver.com/dashboard')
 
     return jsonify({'message': 'Login failed'}), 401
 
