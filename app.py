@@ -81,12 +81,33 @@ def get_user():
     
     try:
         # You can query the database to fetch user details here if needed.
+        # Execute a SQL query to fetch user details
+        cursor.execute("SELECT * FROM users WHERE work_email = %s", (current_user,))
+        
+        # Fetch the user details
+        user_details = cursor.fetchone()
 
-        print("User details fetched successfully.")
-        return jsonify({'work_email': current_user, 'message': 'User details fetched'})
+        if user_details:
+            # Convert the result to a dictionary for JSON serialization
+            user_dict = {
+                'work_email': user_details[0],
+                'other_field1': user_details[1],
+                'other_field2': user_details[2],
+                # Add more fields as needed
+            }
+            
+            print("User details fetched successfully.")
+            return jsonify(user_dict)
+        else:
+            print("User not found in the database.")
+            return jsonify({'error': 'User not found'}), 404
     except Exception as e:
         print("Error:", str(e))
         return jsonify({'error': 'An error occurred'}), 500
+    finally:
+        # Close the database connection
+        if conn:
+            conn.close()
 
 if __name__ == '__main__':
     app.run(debug=False, host='100.118.102.62', port=5000)
