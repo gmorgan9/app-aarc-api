@@ -5,7 +5,7 @@ from flask_jwt_extended import (
 )
 
 app = Flask(__name__)
-app.config['JWT_SECRET_KEY'] = 'your_secret_key'  # Change this to a secure secret key
+app.config['JWT_SECRET_KEY'] = 'new_secret'  # Change this to a secure secret key
 api = Api(app)
 jwt = JWTManager(app)
 
