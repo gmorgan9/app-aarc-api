@@ -1,29 +1,37 @@
 from flask import Flask, request, jsonify
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from flask_bcrypt import Bcrypt
-import secrets
+import os
+import psycopg2
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 app = Flask(__name__)
-app.config['JWT_SECRET_KEY'] = secrets.token_hex(16)  # Change this to a strong, random secret key
+app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')  # Read from .env
 jwt = JWTManager(app)
 bcrypt = Bcrypt(app)
 
-# For demonstration purposes, let's have a dictionary to store user data.
-users = {
-    'user1': {'username': 'user1', 'password': bcrypt.generate_password_hash('password1').decode('utf-8'), 'name': 'User One'},
-    'user2': {'username': 'user2', 'password': bcrypt.generate_password_hash('password2').decode('utf-8'), 'name': 'User Two'}
-}
+# Connect to the PostgreSQL database using the DATABASE_URL from .env
+db_url = os.getenv('DATABASE_URL')
+conn = psycopg2.connect(db_url)
+cursor = conn.cursor()
+
+# No need for the 'users' dictionary anymore
 
 @app.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
-    username = data.get('username')
+    work_email = data.get('work_email')
     password = data.get('password')
 
-    user = users.get(username)
+    # Query the database for the user
+    cursor.execute("SELECT work_email, password FROM users WHERE work_email = %s", (work_email,))
+    row = cursor.fetchone()
 
-    if user and bcrypt.check_password_hash(user['password'], password):
-        access_token = create_access_token(identity=username)
+    if row and bcrypt.check_password_hash(row[1], password):
+        access_token = create_access_token(identity=work_email)
         return jsonify(access_token=access_token)
 
     return jsonify({'message': 'Login failed'}), 401
@@ -38,12 +46,9 @@ def logout():
 @jwt_required()
 def get_user():
     current_user = get_jwt_identity()
-    user = users.get(current_user)
-    
-    if user:
-        return jsonify({'username': user['username'], 'name': user['name']})
-    
-    return jsonify({'message': 'User not found'}), 404
+    # You can query the database to fetch user details here if needed.
+
+    return jsonify({'work_email': current_user, 'message': 'User details fetched'})
 
 if __name__ == '__main__':
     app.run(debug=False, host='100.118.102.62', port=5000)
