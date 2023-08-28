@@ -47,21 +47,39 @@ def token_required(f):
     return decorated
 
 # Route to handle user login and token generation
+# @app.route('/login', methods=['POST'])
+# def login():
+#     auth = request.authorization
+
+#     if not auth or not auth.username or not auth.password:
+#         return jsonify({'message': 'Could not verify - auth'}), 401
+
+#     # Debugging
+#     print(f"Received username: {auth.username}, password: {auth.password}")
+
+#     if users.get(auth.username) == auth.password:
+#         token = generate_token(auth.username)
+#         return jsonify({'token': token})
+
+#     return jsonify({'message': 'Could not verify'}), 401
+
 @app.route('/login', methods=['POST'])
 def login():
     auth = request.authorization
 
     if not auth or not auth.username or not auth.password:
-        return jsonify({'message': 'Could not verify - auth'}), 401
+        return "Authentication required", 401
 
-    # Debugging
-    print(f"Received username: {auth.username}, password: {auth.password}")
+    username = auth.username
+    password = auth.password
 
-    if users.get(auth.username) == auth.password:
-        token = generate_token(auth.username)
-        return jsonify({'token': token})
+    # Here, you can perform authentication using the username and password.
+    # This is typically where you would check if the credentials are valid.
 
-    return jsonify({'message': 'Could not verify'}), 401
+    if username == "user1" and password == "password1":
+        return "Authentication successful"
+    else:
+        return "Authentication failed", 401
 
 
 # Protected route to display user details
