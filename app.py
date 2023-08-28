@@ -52,7 +52,7 @@ def login():
     auth = request.authorization
 
     if not auth or not auth.username or not auth.password:
-        return jsonify({'message': 'Could not verify'}), 401
+        return jsonify({'message': 'Could not verify - auth'}), 401
 
     # Debugging
     print(f"Received username: {auth.username}, password: {auth.password}")
