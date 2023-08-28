@@ -69,7 +69,7 @@ def logout():
     response = make_response(jsonify({'message': 'Logged out'}))
 
     # Remove the access token by setting an empty token with an expired date
-    response.set_cookie('access_token', value='', expires=0, httponly=True)  # Updated here
+    response.set_cookie('access_token', value='', expires=0, httponly=True, secure=True, samesite='Strict')  # Updated here
 
     return response
 
