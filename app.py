@@ -122,9 +122,9 @@ def get_user():
 
 # Define SQL statements for each section
 section_queries = {
-    'CC1': "SELECT * FROM audit_controls WHERE section_number = 'CC1';",
-    'CC2': "SELECT * FROM audit_controls WHERE section_number = 'CC2';",
-    'CC3': "SELECT * FROM audit_controls WHERE section_number = 'CC3';",
+    'CC1': "SELECT * FROM audit_controls WHERE section = 'CC1';",
+    'CC2': "SELECT * FROM audit_controls WHERE section = 'CC2';",
+    'CC3': "SELECT * FROM audit_controls WHERE section = 'CC3';",
     # Add more sections as needed
 }
 
