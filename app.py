@@ -125,33 +125,39 @@ def get_user():
 @app.route('/api/audit-controls', methods=['GET'])
 def get_audit_controls():
     try:
-        # Execute a SQL query to fetch audit controls
-        cursor.execute("SELECT * FROM audit_controls WHERE section = CC1;")
-        
-        # Fetch all audit controls
-        audit_controls = cursor.fetchall()
+        # Create a dictionary to store audit controls for different sections
+        audit_controls_by_section = {}
 
-        audit_controls_CC1 = []
+        # Define a list of section numbers you want to query
+        section_numbers = ['CC1', 'CC2', 'CC3']  # Add more as needed
 
-        for control in audit_controls:
-            control_section = control[2] + "." + control[3]  # Clarify how you want to combine these
+        for section_number in section_numbers:
+            # Execute a SQL query to fetch audit controls for a specific section_number
+            cursor.execute("SELECT * FROM audit_controls WHERE section = %s;", (section_number,))
+            audit_controls = cursor.fetchall()
 
-            audit_controls_dict_CC1 = {
-                'scope_category': control[1],
-                'section_number': control[2],
-                'control_number': control[3],
-                'control_section': control_section,
-                'point_of_focus': control[4],
-                'control_activity': control[5]
-            }
-            
-            audit_controls_CC1.append(audit_controls_dict_CC1)
-        
-        return jsonify(audit_controls_CC1)
+            # Process the audit_controls and store them in the dictionary
+            audit_controls_list = []
+            for control in audit_controls:
+                control_section = control[2] + "." + control[3]  # Clarify how you want to combine these
+                audit_controls_dict = {
+                    'scope_category': control[1],
+                    'section_number': control[2],
+                    'control_number': control[3],
+                    'control_section': control_section,
+                    'point_of_focus': control[4],
+                    'control_activity': control[5]
+                }
+                audit_controls_list.append(audit_controls_dict)
+
+            audit_controls_by_section[section_number] = audit_controls_list
+
+        return jsonify(audit_controls_by_section)
 
     except Exception as e:
         print("Error:", str(e))
         return jsonify({'error': 'Unable to read DB - Audit Controls'}), 500
+
 
 # END AUDIT API
 
