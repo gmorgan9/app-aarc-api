@@ -52,7 +52,7 @@ def login():
 
         return response
 
-    return jsonify({'message': 'Login failed'}), 401
+    return jsonify({'message': 'Login failed-api'}), 401
 
 @app.route('/logout', methods=['POST'])
 @jwt_required()
@@ -88,7 +88,7 @@ def get_user():
         user_details = cursor.fetchone()
 
         if user_details:
-            
+
             # Convert the result to a dictionary for JSON serialization
             cursor.execute("SELECT company_name FROM company WHERE company_id = %d" % user_details[9])
             cn = cursor.fetchone()
