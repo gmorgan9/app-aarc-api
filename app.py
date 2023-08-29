@@ -124,7 +124,7 @@ def get_user():
 def get_audit_controls():
     try:
         # Execute a SQL query to fetch audit controls
-        cursor.execute("SELECT * FROM audit_controls ORDER BY controls_id;")
+        cursor.execute("SELECT * FROM audit_controls WHERE type = 'control' ORDER BY controls_id;")
 
         # Fetch all audit controls
         audit_controls = cursor.fetchall()
