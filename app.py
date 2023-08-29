@@ -137,7 +137,7 @@ def get_audit_controls():
             # Note: Python uses 0-based indexing, so you should use 0, 1, 2, etc. for list indices.
             # Also, make sure to handle the case where there might not be enough elements in the list.
            
-            control_section = audit_controls[2] + audit_controls[3]
+            control_section = audit_controls[2] + "." + audit_controls[3]
 
             audit_controls_dict = {
                 'scope_category': audit_controls[1],
