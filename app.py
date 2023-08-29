@@ -122,28 +122,29 @@ def get_user():
 
 @app.route('/api/audit-controls', methods=['GET'])
 def get_audit_controls():
-    
     try:
-        # You can query the database to fetch user details here if needed.
-        # Execute a SQL query to fetch user details
+        # Execute a SQL query to fetch audit controls
         cursor.execute("SELECT * FROM audit_controls;")
         
-        # Fetch the user details
+        # Fetch all audit controls
         audit_controls = cursor.fetchall()
 
-        if audit_controls:
+        audit_controls_list = []
 
-            control_section = audit_controls[2] + audit_controls[3]
+        for control in audit_controls:
+            control_section = control[2] + control[3]  # Clarify how you want to combine these
 
             audit_controls_dict = {
-                'scope_category': audit_controls[1],
+                'scope_category': control[1],
                 'control_section': control_section,
-                'point_of_focus': audit_controls[4],
-                'control_activty': audit_controls[5]
+                'point_of_focus': control[4],
+                'control_activity': control[5]
             }
             
-            return jsonify(audit_controls_dict)
+            audit_controls_list.append(audit_controls_dict)
         
+        return jsonify(audit_controls_list)
+
     except Exception as e:
         print("Error:", str(e))
         return jsonify({'error': 'Unable to read DB - Audit Controls'}), 500
