@@ -120,47 +120,34 @@ def get_user():
 
 # AUDIT API
 
-# Define SQL statements for each section
-section_queries = {
-    'CC1': "SELECT * FROM audit_controls WHERE section = 'CC1';",
-    'CC2': "SELECT * FROM audit_controls WHERE section = 'CC2';",
-    'CC3': "SELECT * FROM audit_controls WHERE section = 'CC3';",
-    # Add more sections as needed
-}
+
 
 @app.route('/api/audit-controls', methods=['GET'])
 def get_audit_controls():
     try:
-        # Get the section requested by the client from the query parameter
-        section_requested = request.args.get('section')
+        # Execute a SQL query to fetch audit controls
+        cursor.execute("SELECT * FROM audit_controls;")
+        
+        # Fetch all audit controls
+        audit_controls = cursor.fetchall()
 
-        # Check if the requested section is valid
-        if section_requested in section_queries:
-            # Execute the corresponding SQL query for the requested section
-            cursor.execute(section_queries[section_requested])
+        audit_controls_list = []
+
+        for control in audit_controls:
+            control_section = control[2] + "." + control[3]  # Clarify how you want to combine these
+
+            audit_controls_dict = {
+                'scope_category': control[1],
+                'section_number': control[2],
+                'control_number': control[3],
+                'control_section': control_section,
+                'point_of_focus': control[4],
+                'control_activity': control[5]
+            }
             
-            # Fetch all audit controls for the section
-            audit_controls = cursor.fetchall()
-
-            audit_controls_list = []
-
-            for control in audit_controls:
-                control_section = control[2] + "." + control[3]  # Clarify how you want to combine these
-
-                audit_controls_dict = {
-                    'scope_category': control[1],
-                    'section_number': control[2],
-                    'control_number': control[3],
-                    'control_section': control_section,
-                    'point_of_focus': control[4],
-                    'control_activity': control[5]
-                }
-                
-                audit_controls_list.append(audit_controls_dict)
-            
-            return jsonify(audit_controls_list)
-        else:
-            return jsonify({'error': 'Invalid section requested'}), 400
+            audit_controls_list.append(audit_controls_dict)
+        
+        return jsonify(audit_controls_list)
 
     except Exception as e:
         print("Error:", str(e))
