@@ -27,6 +27,8 @@ db_url = os.getenv('DATABASE_URL')
 conn = psycopg2.connect(db_url)
 cursor = conn.cursor()
 
+# USER API
+
 @app.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
@@ -54,6 +56,7 @@ def login():
 
     return jsonify({'message': 'Login failed-api'}), 401
 
+
 @app.route('/logout', methods=['POST'])
 @jwt_required()
 def logout():
@@ -73,6 +76,7 @@ def logout():
 
     return response
     
+
 @app.route('/user', methods=['GET'])
 @jwt_required()
 def get_user():
@@ -111,6 +115,41 @@ def get_user():
     except Exception as e:
         print("Error:", str(e))
         return jsonify({'error': 'An error occurred'}), 500
+
+# END USER API
+
+# AUDIT API
+
+@app.route('/api/audit-controls', methods=['GET'])
+def get_audit_controls():
+    
+    try:
+        # You can query the database to fetch user details here if needed.
+        # Execute a SQL query to fetch user details
+        cursor.execute("SELECT * FROM audit_controls;")
+        
+        # Fetch the user details
+        audit_controls = cursor.fetchone()
+
+        if audit_controls:
+
+            control_section = audit_controls[2] + audit_controls[3]
+
+            audit_controls_dict = {
+                'scope_category': audit_controls[1],
+                'control_section': control_section,
+                'point_of_focus': audit_controls[4],
+                'control_activty': audit_controls[5]
+            }
+            
+            return jsonify(audit_controls_dict)
+        
+    except Exception as e:
+        print("Error:", str(e))
+        return jsonify({'error': 'Unable to read DB - Audit Controls'}), 500
+
+# END AUDIT API
+
 
 if __name__ == '__main__':
     app.run(debug=False, host='100.118.102.62', port=5000)
