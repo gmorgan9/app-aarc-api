@@ -136,6 +136,8 @@ def get_audit_controls():
 
             audit_controls_dict = {
                 'scope_category': control[1],
+                'secion_number': control[2],
+                'control_number': control[3],
                 'control_section': control_section,
                 'point_of_focus': control[4],
                 'control_activity': control[5]
