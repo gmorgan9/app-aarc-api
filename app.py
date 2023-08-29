@@ -144,7 +144,7 @@ def get_audit_controls():
         for control in audit_controls:
             section_number = control[2]
 
-            control_section = f"{control[2]}.{control[3]}"
+            control_section = f"{control[2]}-{control[3]}"
 
             audit_controls_dict = {
                 'scope_category': control[1],
