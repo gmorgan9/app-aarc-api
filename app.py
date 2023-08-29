@@ -125,14 +125,19 @@ def get_audit_controls():
     try:
         # Execute a SQL query to fetch audit controls
         cursor.execute("SELECT * FROM audit_controls;")
-        
+
         # Fetch all audit controls
         audit_controls = cursor.fetchall()
 
-        audit_controls_list = []
+        # Create variables for each section
+        cc1_controls = []
+        cc2_controls = []
+        # Create more variables for other sections as needed
 
         for control in audit_controls:
-            control_section = control[2] + "." + control[3]  # Clarify how you want to combine these
+            section_number = control[2]
+
+            control_section = f"{control[2]}.{control[3]}"
 
             audit_controls_dict = {
                 'scope_category': control[1],
@@ -142,14 +147,27 @@ def get_audit_controls():
                 'point_of_focus': control[4],
                 'control_activity': control[5]
             }
-            
-            audit_controls_list.append(audit_controls_dict)
-        
-        return jsonify(audit_controls_list)
+
+            # Add the control to the appropriate section variable
+            if section_number == 'CC1':
+                cc1_controls.append(audit_controls_dict)
+            elif section_number == 'CC2':
+                cc2_controls.append(audit_controls_dict)
+            # Add more conditions for other sections as needed
+
+        # Create a dictionary to store section variables
+        section_controls = {
+            'CC1': cc1_controls,
+            'CC2': cc2_controls,
+            # Add more sections as needed
+        }
+
+        return jsonify(section_controls)
 
     except Exception as e:
         print("Error:", str(e))
         return jsonify({'error': 'Unable to read DB - Audit Controls'}), 500
+
 
 # END AUDIT API
 
