@@ -89,7 +89,7 @@ def get_user():
 
         if user_details:
             # Convert the result to a dictionary for JSON serialization
-            cursor.execute("SELECT company_name FROM company WHERE company_id = %i", (user_details[9]))
+            cursor.execute("SELECT company_name FROM company WHERE company_id = %s", (user_details[9]))
             cn = cursor.fetchone()
 
             user_dict = {
