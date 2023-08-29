@@ -126,17 +126,17 @@ def get_user():
 def get_audit_controls():
     try:
         # Execute a SQL query to fetch audit controls
-        cursor.execute("SELECT * FROM audit_controls;")
+        cursor.execute("SELECT * FROM audit_controls WHERE section = CC1;")
         
         # Fetch all audit controls
         audit_controls = cursor.fetchall()
 
-        audit_controls_list = []
+        audit_controls_CC1 = []
 
         for control in audit_controls:
             control_section = control[2] + "." + control[3]  # Clarify how you want to combine these
 
-            audit_controls_dict = {
+            audit_controls_dict_CC1 = {
                 'scope_category': control[1],
                 'section_number': control[2],
                 'control_number': control[3],
@@ -145,9 +145,9 @@ def get_audit_controls():
                 'control_activity': control[5]
             }
             
-            audit_controls_list.append(audit_controls_dict)
+            audit_controls_CC1.append(audit_controls_dict_CC1)
         
-        return jsonify(audit_controls_list)
+        return jsonify(audit_controls_CC1)
 
     except Exception as e:
         print("Error:", str(e))
