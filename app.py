@@ -144,15 +144,16 @@ def get_audit_controls():
         for control in audit_controls:
             section_number = control[2]
 
-            control_section = f"{control[2]}-{control[3]}"
+            control_section = f"{control[3]}-{control[4]}"
 
             audit_controls_dict = {
                 'scope_category': control[1],
-                'section_number': control[2],
-                'control_number': control[3],
+                'section': control[2],
+                'section_number': control[3],
+                'control_number': control[4],
                 'control_section': control_section,
-                'point_of_focus': control[4],
-                'control_activity': control[5]
+                'point_of_focus': control[5],
+                'control_activity': control[6]
             }
 
             # Add the control to the appropriate section variable
