@@ -132,7 +132,7 @@ def get_audit_controls():
         audit_controls_list = []
 
         for control in audit_controls:
-            control_section = control[2] + control[3]  # Clarify how you want to combine these
+            control_section = control[2] + "." + control[3]  # Clarify how you want to combine these
 
             audit_controls_dict = {
                 'scope_category': control[1],
