@@ -132,6 +132,13 @@ def get_audit_controls():
         # Create variables for each section
         cc1_controls = []
         cc2_controls = []
+        cc3_controls = []
+        cc4_controls = []
+        cc5_controls = []
+        cc6_controls = []
+        cc7_controls = []
+        cc8_controls = []
+        cc9_controls = []
         # Create more variables for other sections as needed
 
         for control in audit_controls:
@@ -153,12 +160,33 @@ def get_audit_controls():
                 cc1_controls.append(audit_controls_dict)
             elif section_number == 'CC2':
                 cc2_controls.append(audit_controls_dict)
+            elif section_number == 'CC3':
+                cc3_controls.append(audit_controls_dict)
+            elif section_number == 'CC4':
+                cc4_controls.append(audit_controls_dict)
+            elif section_number == 'CC5':
+                cc5_controls.append(audit_controls_dict)
+            elif section_number == 'CC6':
+                cc6_controls.append(audit_controls_dict)
+            elif section_number == 'CC7':
+                cc7_controls.append(audit_controls_dict)
+            elif section_number == 'CC8':
+                cc8_controls.append(audit_controls_dict)
+            elif section_number == 'CC9':
+                cc9_controls.append(audit_controls_dict)
             # Add more conditions for other sections as needed
 
         # Create a dictionary to store section variables
         section_controls = {
             'CC1': cc1_controls,
             'CC2': cc2_controls,
+            'CC3': cc3_controls,
+            'CC4': cc4_controls,
+            'CC5': cc5_controls,
+            'CC6': cc6_controls,
+            'CC7': cc7_controls,
+            'CC8': cc8_controls,
+            'CC9': cc9_controls,
             # Add more sections as needed
         }
 
