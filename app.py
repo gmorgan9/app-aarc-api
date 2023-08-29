@@ -129,7 +129,7 @@ def get_audit_controls():
         cursor.execute("SELECT * FROM audit_controls;")
         
         # Fetch the user details
-        audit_controls = cursor.fetchone()
+        audit_controls = cursor.fetchall()
 
         if audit_controls:
 
