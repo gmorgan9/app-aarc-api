@@ -99,7 +99,7 @@ def get_user():
                 'work_email': user_details[3],
                 'job_title': user_details[5],
                 'account_type': user_details[6],
-                'company_name': cn
+                'company_name': cn[0]
             }
             
             print("User details fetched successfully.")
